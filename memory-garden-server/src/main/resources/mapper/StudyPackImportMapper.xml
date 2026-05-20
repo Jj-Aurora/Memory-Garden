@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.memorygarden.mapper.StudyPackImportMapper">
+
+    <resultMap id="BaseResultMap" type="com.memorygarden.model.entity.StudyPackImport">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="pack_id" property="packId"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_study_pack_import (user_id, pack_id, is_deleted)
+        VALUES (#{userId}, #{packId}, #{isDeleted})
+    </insert>
+
+    <select id="existsByUserIdAndPackId" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM t_study_pack_import
+        WHERE user_id = #{userId} AND pack_id = #{packId} AND is_deleted = 0
+    </select>
+
+</mapper>

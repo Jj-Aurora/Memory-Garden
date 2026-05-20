@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BadgeController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.controller</a> &gt; <span class="el_source">BadgeController.java</span></div><h1>BadgeController.java</h1><pre class="source lang-java linenums">package com.memorygarden.controller;
+
+import com.memorygarden.common.result.BaseResponse;
+import com.memorygarden.interceptor.AuthInterceptor;
+import com.memorygarden.model.vo.BadgeVO;
+import com.memorygarden.service.BadgeService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+/**
+ * 徽章控制器
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+@RestController
+@RequestMapping(&quot;/api/badge&quot;)
+@Api(tags = &quot;徽章模块&quot;)
+<span class="fc" id="L24">public class BadgeController {</span>
+
+    @Resource
+    private BadgeService badgeService;
+
+    /**
+     * 获取所有徽章列表接口（含获得状态）。
+     *
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为徽章列表
+     */
+    @GetMapping(&quot;/list&quot;)
+    @ApiOperation(&quot;获取所有徽章列表&quot;)
+    public BaseResponse&lt;List&lt;BadgeVO&gt;&gt; getAllBadges(HttpServletRequest request) {
+<span class="fc" id="L38">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L39">        List&lt;BadgeVO&gt; list = badgeService.getAllBadges(userId);</span>
+<span class="fc" id="L40">        return BaseResponse.success(list);</span>
+    }
+
+    /**
+     * 获取已获得的徽章列表接口。
+     *
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为已获得徽章列表
+     */
+    @GetMapping(&quot;/my&quot;)
+    @ApiOperation(&quot;获取已获得徽章&quot;)
+    public BaseResponse&lt;List&lt;BadgeVO&gt;&gt; getMyBadges(HttpServletRequest request) {
+<span class="fc" id="L52">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L53">        List&lt;BadgeVO&gt; list = badgeService.getMyBadges(userId);</span>
+<span class="fc" id="L54">        return BaseResponse.success(list);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.memorygarden.integration.ReviewIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.208 s - in com.memorygarden.integration.ReviewIntegrationTest

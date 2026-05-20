@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.memorygarden.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.memorygarden.model.entity.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="nickname" property="nickname"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="current_streak" property="currentStreak"/>
+        <result column="max_streak" property="maxStreak"/>
+        <result column="last_check_in" property="lastCheckIn"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, username, password, nickname, avatar_url, current_streak, max_streak,
+        last_check_in, status, is_deleted, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_user
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_user
+        WHERE username = #{username} AND is_deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_user (username, password, nickname, avatar_url, current_streak, max_streak,
+                           last_check_in, status, is_deleted)
+        VALUES (#{username}, #{password}, #{nickname}, #{avatarUrl}, #{currentStreak}, #{maxStreak},
+                #{lastCheckIn}, #{status}, #{isDeleted})
+    </insert>
+
+    <update id="updateById">
+        UPDATE t_user
+        <set>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="avatarUrl != null">avatar_url = #{avatarUrl},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="currentStreak != null">current_streak = #{currentStreak},</if>
+            <if test="maxStreak != null">max_streak = #{maxStreak},</if>
+            <if test="lastCheckIn != null">last_check_in = #{lastCheckIn},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>

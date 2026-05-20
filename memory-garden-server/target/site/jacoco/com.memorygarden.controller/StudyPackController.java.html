@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StudyPackController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.controller</a> &gt; <span class="el_source">StudyPackController.java</span></div><h1>StudyPackController.java</h1><pre class="source lang-java linenums">package com.memorygarden.controller;
+
+import com.memorygarden.common.result.BaseResponse;
+import com.memorygarden.interceptor.AuthInterceptor;
+import com.memorygarden.model.entity.StudyPack;
+import com.memorygarden.model.entity.StudyPackItem;
+import com.memorygarden.service.StudyPackService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+/**
+ * 预设知识包控制器
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+@RestController
+@RequestMapping(&quot;/api/study-pack&quot;)
+@Api(tags = &quot;预设知识包模块&quot;)
+<span class="fc" id="L25">public class StudyPackController {</span>
+
+    @Resource
+    private StudyPackService studyPackService;
+
+    /**
+     * 获取可用知识包列表接口。
+     *
+     * @return 统一返回结构，data 为知识包列表
+     */
+    @GetMapping(&quot;/list&quot;)
+    @ApiOperation(&quot;获取知识包列表&quot;)
+    public BaseResponse&lt;List&lt;StudyPack&gt;&gt; list() {
+<span class="fc" id="L38">        List&lt;StudyPack&gt; packs = studyPackService.list();</span>
+<span class="fc" id="L39">        return BaseResponse.success(packs);</span>
+    }
+
+    /**
+     * 获取知识包详情接口。
+     *
+     * @param id 知识包 ID
+     * @return 统一返回结构，data 为知识包实体
+     */
+    @GetMapping(&quot;/{id}&quot;)
+    @ApiOperation(&quot;获取知识包详情&quot;)
+    public BaseResponse&lt;StudyPack&gt; getDetail(@PathVariable Long id) {
+<span class="fc" id="L51">        StudyPack pack = studyPackService.getDetail(id);</span>
+<span class="fc" id="L52">        return BaseResponse.success(pack);</span>
+    }
+
+    /**
+     * 获取知识包条目列表接口。
+     *
+     * @param id 知识包 ID
+     * @return 统一返回结构，data 为条目列表
+     */
+    @GetMapping(&quot;/{id}/items&quot;)
+    @ApiOperation(&quot;获取知识包条目列表&quot;)
+    public BaseResponse&lt;List&lt;StudyPackItem&gt;&gt; getPackItems(@PathVariable Long id) {
+<span class="fc" id="L64">        List&lt;StudyPackItem&gt; items = studyPackService.getPackItems(id);</span>
+<span class="fc" id="L65">        return BaseResponse.success(items);</span>
+    }
+
+    /**
+     * 导入知识包到个人花园接口。
+     *
+     * &lt;p&gt;用途：前端提交导入请求，后端批量创建卡片和植物。&lt;/p&gt;
+     *
+     * @param id      知识包 ID
+     * @param request HTTP 请求对象（用于获取当前登录用户 ID）
+     * @return 统一返回结构，data 为导入的卡片数量
+     */
+    @PostMapping(&quot;/{id}/import&quot;)
+    @ApiOperation(&quot;导入知识包&quot;)
+    public BaseResponse&lt;Integer&gt; importPack(@PathVariable Long id, HttpServletRequest request) {
+<span class="fc" id="L80">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L81">        int count = studyPackService.importPack(userId, id);</span>
+<span class="fc" id="L82">        return BaseResponse.success(count);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

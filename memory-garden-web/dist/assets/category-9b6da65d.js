@@ -1,0 +1,1 @@
+import{p as r,g as a,a as o,d as s}from"./request-d1708f18.js";const g={create(t){return r("/category",t)},list(){return a("/category/list")},update(t,e){return o(`/category/${t}`,e)},delete(t){return s(`/category/${t}`)}};export{g as c};

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EbbinghausCalculator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.algorithm</a> &gt; <span class="el_source">EbbinghausCalculator.java</span></div><h1>EbbinghausCalculator.java</h1><pre class="source lang-java linenums">package com.memorygarden.algorithm;
+
+/**
+ * 艾宾浩斯遗忘曲线间隔计算器
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+public class EbbinghausCalculator {
+
+    /**
+     * 复习间隔表（天）：轮次1~6对应 [1,2,4,7,15,30]
+     */
+<span class="fc" id="L14">    private static final int[] INTERVAL_TABLE = {1, 2, 4, 7, 15, 30};</span>
+
+    /**
+     * 根据复习轮次获取间隔天数
+     * &lt;p&gt;轮次1~6查表，轮次≥6固定返回30天，轮次0返回1天&lt;/p&gt;
+     *
+     * @param round 复习轮次（从1开始）
+     * @return 间隔天数
+     */
+    public static int getIntervalDays(int round) {
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        if (round &lt;= 0) {</span>
+<span class="fc" id="L25">            return 1;</span>
+        }
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (round &gt; INTERVAL_TABLE.length) {</span>
+<span class="fc" id="L28">            return 30;</span>
+        }
+<span class="fc" id="L30">        return INTERVAL_TABLE[round - 1];</span>
+    }
+
+    /**
+     * 智能重算等效轮次
+     * &lt;p&gt;根据逾期天数，计算等效轮次。逾期越久，回退越多。&lt;/p&gt;
+     * &lt;p&gt;算法：从当前轮次逐级回退，每级扣除该轮次对应的间隔天数，
+     * 直到逾期天数不足以再回退一级。最低不低于1。&lt;/p&gt;
+     *
+     * @param currentRound 当前轮次
+     * @param overdueDays  逾期天数
+     * @return 等效轮次（最低为1）
+     */
+    public static int calcEffectiveRound(int currentRound, int overdueDays) {
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (overdueDays &lt;= 0) {</span>
+<span class="fc" id="L45">            return currentRound;</span>
+        }
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (currentRound &lt;= 1) {</span>
+<span class="fc" id="L48">            return 1;</span>
+        }
+
+<span class="fc" id="L51">        int remaining = overdueDays;</span>
+<span class="fc" id="L52">        int effectiveRound = currentRound;</span>
+
+        // 从当前轮次逐级回退
+<span class="pc bpc" id="L55" title="1 of 4 branches missed.">        while (effectiveRound &gt; 1 &amp;&amp; remaining &gt; 0) {</span>
+<span class="fc" id="L56">            int interval = getIntervalDays(effectiveRound);</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">            if (remaining &gt;= interval) {</span>
+<span class="fc" id="L58">                remaining -= interval;</span>
+<span class="fc" id="L59">                effectiveRound--;</span>
+            } else {
+                break;
+            }
+<span class="fc" id="L63">        }</span>
+
+<span class="fc" id="L65">        return Math.max(1, effectiveRound);</span>
+    }
+
+    private EbbinghausCalculator() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

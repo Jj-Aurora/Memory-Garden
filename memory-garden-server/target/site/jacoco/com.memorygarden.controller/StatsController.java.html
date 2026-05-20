@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatsController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.controller</a> &gt; <span class="el_source">StatsController.java</span></div><h1>StatsController.java</h1><pre class="source lang-java linenums">package com.memorygarden.controller;
+
+import com.memorygarden.common.result.BaseResponse;
+import com.memorygarden.interceptor.AuthInterceptor;
+import com.memorygarden.model.vo.StatsVO;
+import com.memorygarden.service.StatsService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
+
+/**
+ * 学习统计控制器
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+@RestController
+@RequestMapping(&quot;/api/stats&quot;)
+@Api(tags = &quot;学习统计模块&quot;)
+<span class="fc" id="L24">public class StatsController {</span>
+
+    @Resource
+    private StatsService statsService;
+
+    /**
+     * 获取今日学习数据接口。
+     *
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为统计视图对象
+     */
+    @GetMapping(&quot;/today&quot;)
+    @ApiOperation(&quot;获取今日学习数据&quot;)
+    public BaseResponse&lt;StatsVO&gt; getToday(HttpServletRequest request) {
+<span class="fc" id="L38">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L39">        StatsVO vo = statsService.getToday(userId);</span>
+<span class="fc" id="L40">        return BaseResponse.success(vo);</span>
+    }
+
+    /**
+     * 获取趋势数据接口。
+     *
+     * @param days    天数（默认 7）
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为日期-&gt;数量映射
+     */
+    @GetMapping(&quot;/trend&quot;)
+    @ApiOperation(&quot;获取趋势数据&quot;)
+    public BaseResponse&lt;Map&lt;String, Integer&gt;&gt; getTrend(@RequestParam(defaultValue = &quot;7&quot;) int days,
+                                                        HttpServletRequest request) {
+<span class="fc" id="L54">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L55">        Map&lt;String, Integer&gt; trend = statsService.getTrend(userId, days);</span>
+<span class="fc" id="L56">        return BaseResponse.success(trend);</span>
+    }
+
+    /**
+     * 获取连续打卡数据接口。
+     *
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为连续天数
+     */
+    @GetMapping(&quot;/streak&quot;)
+    @ApiOperation(&quot;获取连续打卡天数&quot;)
+    public BaseResponse&lt;Integer&gt; getStreak(HttpServletRequest request) {
+<span class="fc" id="L68">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L69">        int streak = statsService.getStreak(userId);</span>
+<span class="fc" id="L70">        return BaseResponse.success(streak);</span>
+    }
+
+    /**
+     * 获取各阶段植物数量分布接口。
+     *
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为阶段-&gt;数量映射
+     */
+    @GetMapping(&quot;/stage-distribution&quot;)
+    @ApiOperation(&quot;获取各阶段植物分布&quot;)
+    public BaseResponse&lt;Map&lt;Integer, Integer&gt;&gt; getStageDistribution(HttpServletRequest request) {
+<span class="fc" id="L82">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L83">        Map&lt;Integer, Integer&gt; distribution = statsService.getStageDistribution(userId);</span>
+<span class="fc" id="L84">        return BaseResponse.success(distribution);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

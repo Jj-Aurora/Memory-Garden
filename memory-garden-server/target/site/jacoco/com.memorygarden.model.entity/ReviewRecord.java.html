@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReviewRecord.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.model.entity</a> &gt; <span class="el_source">ReviewRecord.java</span></div><h1>ReviewRecord.java</h1><pre class="source lang-java linenums">package com.memorygarden.model.entity;
+
+import lombok.Data;
+
+import java.time.LocalDate;
+import java.util.Date;
+
+/**
+ * 复习记录实体
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+<span class="pc bnc" id="L14" title="All 118 branches missed.">@Data</span>
+public class ReviewRecord {
+
+    /**
+     * 主键
+     */
+<span class="fc" id="L20">    private Long id;</span>
+
+    /**
+     * 所属用户
+     */
+<span class="fc" id="L25">    private Long userId;</span>
+
+    /**
+     * 关联知识卡片
+     */
+<span class="fc" id="L30">    private Long cardId;</span>
+
+    /**
+     * 关联植物
+     */
+<span class="fc" id="L35">    private Long plantId;</span>
+
+    /**
+     * 自评：1-记住了，2-模糊，3-忘记了
+     */
+<span class="fc" id="L40">    private Integer selfEvaluation;</span>
+
+    /**
+     * 复习前生长阶段
+     */
+<span class="fc" id="L45">    private Integer prevStage;</span>
+
+    /**
+     * 复习后生长阶段
+     */
+<span class="fc" id="L50">    private Integer afterStage;</span>
+
+    /**
+     * 复习前复习轮次
+     */
+<span class="fc" id="L55">    private Integer prevRound;</span>
+
+    /**
+     * 复习后复习轮次
+     */
+<span class="fc" id="L60">    private Integer afterRound;</span>
+
+    /**
+     * 复习时是否处于枯萎状态
+     */
+<span class="fc" id="L65">    private Integer wasWithered;</span>
+
+    /**
+     * 原计划复习日期
+     */
+<span class="fc" id="L70">    private LocalDate scheduledDate;</span>
+
+    /**
+     * 实际复习日期
+     */
+<span class="fc" id="L75">    private LocalDate actualDate;</span>
+
+    /**
+     * 软删除：0-未删除，1-已删除
+     */
+<span class="fc" id="L80">    private Integer isDeleted;</span>
+
+    /**
+     * 创建时间
+     */
+<span class="nc" id="L85">    private Date createTime;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

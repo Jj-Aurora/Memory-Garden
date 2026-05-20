@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReviewServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.service.impl</a> &gt; <span class="el_source">ReviewServiceImpl.java</span></div><h1>ReviewServiceImpl.java</h1><pre class="source lang-java linenums">package com.memorygarden.service.impl;
+
+import com.memorygarden.algorithm.EbbinghausCalculator;
+import com.memorygarden.algorithm.GrowthStageCalculator;
+import com.memorygarden.mapper.KnowledgeCardMapper;
+import com.memorygarden.mapper.PlantMapper;
+import com.memorygarden.mapper.ReviewRecordMapper;
+import com.memorygarden.mapper.UserMapper;
+import com.memorygarden.model.dto.ReviewSubmitRequest;
+import com.memorygarden.model.entity.KnowledgeCard;
+import com.memorygarden.model.entity.Plant;
+import com.memorygarden.model.entity.ReviewRecord;
+import com.memorygarden.model.entity.User;
+import com.memorygarden.model.enums.SelfEvaluation;
+import com.memorygarden.model.vo.ReviewSummaryVO;
+import com.memorygarden.model.vo.ReviewVO;
+import com.memorygarden.service.ReviewService;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * 复习服务实现类
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+@Service
+public class ReviewServiceImpl implements ReviewService {
+
+    private final PlantMapper plantMapper;
+    private final KnowledgeCardMapper cardMapper;
+    private final ReviewRecordMapper reviewRecordMapper;
+    private final UserMapper userMapper;
+
+    public ReviewServiceImpl(PlantMapper plantMapper, KnowledgeCardMapper cardMapper,
+<span class="fc" id="L40">                             ReviewRecordMapper reviewRecordMapper, UserMapper userMapper) {</span>
+<span class="fc" id="L41">        this.plantMapper = plantMapper;</span>
+<span class="fc" id="L42">        this.cardMapper = cardMapper;</span>
+<span class="fc" id="L43">        this.reviewRecordMapper = reviewRecordMapper;</span>
+<span class="fc" id="L44">        this.userMapper = userMapper;</span>
+<span class="fc" id="L45">    }</span>
+
+    /**
+     * 获取今日待复习列表
+     *
+     * @param userId 用户 ID
+     * @return 待复习卡片列表
+     */
+    @Override
+    public List&lt;ReviewVO&gt; getPending(Long userId) {
+<span class="fc" id="L55">        List&lt;Plant&gt; plants = plantMapper.selectByUserId(userId);</span>
+<span class="fc" id="L56">        LocalDate today = LocalDate.now();</span>
+
+<span class="fc" id="L58">        return plants.stream()</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">                .filter(p -&gt; p.getIsDeleted() == 0)</span>
+<span class="fc bfc" id="L60" title="All 4 branches covered.">                .filter(p -&gt; p.getNextReviewDate() != null &amp;&amp; !p.getNextReviewDate().isAfter(today))</span>
+<span class="fc" id="L61">                .sorted(Comparator.comparing(Plant::getNextReviewDate))</span>
+<span class="fc" id="L62">                .map(this::convertToReviewVO)</span>
+<span class="fc" id="L63">                .collect(Collectors.toList());</span>
+    }
+
+    /**
+     * 获取下一棵待复习植物详情
+     *
+     * @param userId 用户 ID
+     * @return 复习视图对象
+     */
+    @Override
+    public ReviewVO getNext(Long userId) {
+<span class="fc" id="L74">        List&lt;ReviewVO&gt; pending = getPending(userId);</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        return pending.isEmpty() ? null : pending.get(0);</span>
+    }
+
+    /**
+     * 提交复习自评结果
+     *
+     * @param userId  用户 ID
+     * @param request 提交请求
+     * @return 是否成功
+     */
+    @Override
+    public boolean submit(Long userId, ReviewSubmitRequest request) {
+<span class="fc" id="L87">        Plant plant = plantMapper.selectByCardId(request.getCardId());</span>
+<span class="fc bfc" id="L88" title="All 4 branches covered.">        if (plant == null || plant.getIsDeleted() == 1) {</span>
+<span class="fc" id="L89">            throw new RuntimeException(&quot;植物不存在&quot;);</span>
+        }
+
+<span class="fc" id="L92">        KnowledgeCard card = cardMapper.selectById(request.getCardId());</span>
+<span class="pc bpc" id="L93" title="2 of 4 branches missed.">        if (card == null || card.getIsDeleted() == 1) {</span>
+<span class="nc" id="L94">            throw new RuntimeException(&quot;卡片不存在&quot;);</span>
+        }
+
+<span class="fc" id="L97">        int evalValue = request.getSelfEvaluation();</span>
+<span class="fc" id="L98">        SelfEvaluation evaluation = SelfEvaluation.fromValue(evalValue);</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        if (evaluation == null) {</span>
+<span class="fc" id="L100">            throw new RuntimeException(&quot;无效的自评值&quot;);</span>
+        }
+
+<span class="fc" id="L103">        int stageBefore = plant.getGrowthStage();</span>
+<span class="fc" id="L104">        int roundBefore = plant.getReviewRound();</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        boolean wasWithered = plant.getIsWithered() == 1;</span>
+<span class="fc" id="L106">        LocalDate oldNextReviewDate = plant.getNextReviewDate();</span>
+
+<span class="fc" id="L108">        int newStage = GrowthStageCalculator.calculateNextStage(stageBefore, evaluation, wasWithered);</span>
+
+        int newRound;
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        if (evaluation == SelfEvaluation.REMEMBERED) {</span>
+<span class="fc" id="L112">            newRound = roundBefore + 1;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        } else if (evaluation == SelfEvaluation.VAGUE) {</span>
+<span class="fc" id="L114">            newRound = roundBefore;</span>
+        } else {
+<span class="fc" id="L116">            newRound = Math.max(1, roundBefore - 1);</span>
+        }
+
+<span class="fc" id="L119">        int effectiveRound = newRound;</span>
+<span class="fc bfc" id="L120" title="All 4 branches covered.">        if (wasWithered &amp;&amp; evaluation == SelfEvaluation.REMEMBERED) {</span>
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">            if (oldNextReviewDate != null) {</span>
+<span class="fc" id="L122">                long overdueDays = java.time.temporal.ChronoUnit.DAYS.between(</span>
+<span class="fc" id="L123">                        oldNextReviewDate, LocalDate.now());</span>
+<span class="fc" id="L124">                effectiveRound = EbbinghausCalculator.calcEffectiveRound(roundBefore, (int) overdueDays);</span>
+            }
+<span class="fc" id="L126">            plant.setIsWithered(0);</span>
+        }
+
+<span class="fc bfc" id="L129" title="All 4 branches covered.">        if (evaluation == SelfEvaluation.FORGOTTEN &amp;&amp; wasWithered) {</span>
+<span class="fc" id="L130">            plant.setIsWithered(1);</span>
+        }
+
+<span class="fc" id="L133">        int intervalDays = EbbinghausCalculator.getIntervalDays(effectiveRound);</span>
+<span class="fc" id="L134">        LocalDate nextReviewDate = LocalDate.now().plusDays(intervalDays);</span>
+
+<span class="fc" id="L136">        plant.setGrowthStage(newStage);</span>
+<span class="fc" id="L137">        plant.setReviewRound(newRound);</span>
+<span class="fc" id="L138">        plant.setTotalReviewCount(plant.getTotalReviewCount() + 1);</span>
+<span class="fc" id="L139">        plant.setNextReviewDate(nextReviewDate);</span>
+<span class="fc" id="L140">        plantMapper.updateById(plant);</span>
+
+<span class="fc" id="L142">        ReviewRecord record = new ReviewRecord();</span>
+<span class="fc" id="L143">        record.setPlantId(plant.getId());</span>
+<span class="fc" id="L144">        record.setCardId(request.getCardId());</span>
+<span class="fc" id="L145">        record.setUserId(userId);</span>
+<span class="fc" id="L146">        record.setSelfEvaluation(evalValue);</span>
+<span class="fc" id="L147">        record.setPrevStage(stageBefore);</span>
+<span class="fc" id="L148">        record.setAfterStage(newStage);</span>
+<span class="fc" id="L149">        record.setPrevRound(roundBefore);</span>
+<span class="fc" id="L150">        record.setAfterRound(newRound);</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">        record.setWasWithered(wasWithered ? 1 : 0);</span>
+<span class="fc" id="L152">        record.setScheduledDate(oldNextReviewDate);</span>
+<span class="fc" id="L153">        record.setActualDate(LocalDate.now());</span>
+<span class="fc" id="L154">        record.setIsDeleted(0);</span>
+<span class="fc" id="L155">        reviewRecordMapper.insert(record);</span>
+
+<span class="fc" id="L157">        updateCheckIn(userId);</span>
+
+<span class="fc" id="L159">        return true;</span>
+    }
+
+    /**
+     * 获取今日复习完成总结
+     *
+     * @param userId 用户 ID
+     * @return 复习总结
+     */
+    @Override
+    public ReviewSummaryVO getSummary(Long userId) {
+<span class="fc" id="L170">        List&lt;ReviewRecord&gt; records = reviewRecordMapper.selectByUserIdAndDate(userId, LocalDate.now());</span>
+
+<span class="fc" id="L172">        ReviewSummaryVO summary = new ReviewSummaryVO();</span>
+<span class="fc" id="L173">        summary.setTotalReviewed(records.size());</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        summary.setRememberedCount((int) records.stream().filter(r -&gt; r.getSelfEvaluation() == 1).count());</span>
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">        summary.setVagueCount((int) records.stream().filter(r -&gt; r.getSelfEvaluation() == 2).count());</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        summary.setForgottenCount((int) records.stream().filter(r -&gt; r.getSelfEvaluation() == 3).count());</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        summary.setUpgradedCount((int) records.stream().filter(r -&gt; r.getAfterStage() &gt; r.getPrevStage()).count());</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        summary.setDowngradedCount((int) records.stream().filter(r -&gt; r.getAfterStage() &lt; r.getPrevStage()).count());</span>
+<span class="fc" id="L179">        summary.setRemainingCount(getPendingCount(userId));</span>
+
+<span class="fc" id="L181">        return summary;</span>
+    }
+
+    /**
+     * 获取待复习数量
+     *
+     * @param userId 用户 ID
+     * @return 待复习数量
+     */
+    @Override
+    public int getPendingCount(Long userId) {
+<span class="fc" id="L192">        return getPending(userId).size();</span>
+    }
+
+    /**
+     * 更新打卡天数
+     *
+     * @param userId 用户 ID
+     */
+    private void updateCheckIn(Long userId) {
+<span class="fc" id="L201">        User user = userMapper.selectById(userId);</span>
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">        if (user == null) {</span>
+<span class="nc" id="L203">            return;</span>
+        }
+
+<span class="fc" id="L206">        LocalDate today = LocalDate.now();</span>
+<span class="fc" id="L207">        LocalDate lastCheckIn = user.getLastCheckIn();</span>
+
+<span class="pc bpc" id="L209" title="1 of 4 branches missed.">        if (lastCheckIn == null || lastCheckIn.isBefore(today)) {</span>
+<span class="fc bfc" id="L210" title="All 4 branches covered.">            if (lastCheckIn != null &amp;&amp; lastCheckIn.plusDays(1).equals(today)) {</span>
+<span class="fc" id="L211">                user.setCurrentStreak(user.getCurrentStreak() + 1);</span>
+            } else {
+<span class="fc" id="L213">                user.setCurrentStreak(1);</span>
+            }
+
+<span class="pc bpc" id="L216" title="1 of 2 branches missed.">            if (user.getCurrentStreak() &gt; user.getMaxStreak()) {</span>
+<span class="fc" id="L217">                user.setMaxStreak(user.getCurrentStreak());</span>
+            }
+
+<span class="fc" id="L220">            user.setLastCheckIn(today);</span>
+<span class="fc" id="L221">            userMapper.updateById(user);</span>
+        }
+<span class="fc" id="L223">    }</span>
+
+    /**
+     * 将 Plant 转换为 ReviewVO
+     *
+     * @param plant 植物实体
+     * @return 复习视图对象
+     */
+    private ReviewVO convertToReviewVO(Plant plant) {
+<span class="fc" id="L232">        KnowledgeCard card = cardMapper.selectById(plant.getCardId());</span>
+
+<span class="fc" id="L234">        ReviewVO vo = new ReviewVO();</span>
+<span class="fc" id="L235">        vo.setCardId(plant.getCardId());</span>
+<span class="fc" id="L236">        vo.setGrowthStage(plant.getGrowthStage());</span>
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">        vo.setWithered(plant.getIsWithered() == 1);</span>
+<span class="fc" id="L238">        vo.setReviewRound(plant.getReviewRound());</span>
+<span class="fc" id="L239">        vo.setScheduledDate(plant.getNextReviewDate());</span>
+
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        if (card != null) {</span>
+<span class="fc" id="L242">            vo.setFrontContent(card.getFrontContent());</span>
+<span class="fc" id="L243">            vo.setBackContent(card.getBackContent());</span>
+<span class="fc" id="L244">            vo.setNote(card.getNote());</span>
+        }
+
+<span class="fc" id="L247">        return vo;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResultCode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.common.result</a> &gt; <span class="el_source">ResultCode.java</span></div><h1>ResultCode.java</h1><pre class="source lang-java linenums">package com.memorygarden.common.result;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+/**
+ * 返回码枚举
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+<span class="fc" id="L12">@Getter</span>
+<span class="fc" id="L13">@AllArgsConstructor</span>
+public enum ResultCode {
+
+    /**
+     * 成功
+     */
+<span class="fc" id="L19">    SUCCESS(0, &quot;成功&quot;),</span>
+
+    /**
+     * 请求参数错误
+     */
+<span class="fc" id="L24">    PARAMS_ERROR(40000, &quot;请求参数错误&quot;),</span>
+
+    /**
+     * 未登录
+     */
+<span class="fc" id="L29">    NOT_LOGIN_ERROR(40100, &quot;未登录&quot;),</span>
+
+    /**
+     * 无权限
+     */
+<span class="fc" id="L34">    NO_AUTH_ERROR(40101, &quot;无权限&quot;),</span>
+
+    /**
+     * 请求数据不存在
+     */
+<span class="fc" id="L39">    NOT_FOUND_ERROR(40400, &quot;请求数据不存在&quot;),</span>
+
+    /**
+     * 禁止访问
+     */
+<span class="fc" id="L44">    FORBIDDEN_ERROR(40300, &quot;禁止访问&quot;),</span>
+
+    /**
+     * 系统内部异常
+     */
+<span class="fc" id="L49">    SYSTEM_ERROR(50000, &quot;系统内部异常&quot;),</span>
+
+    /**
+     * 操作失败
+     */
+<span class="fc" id="L54">    OPERATION_ERROR(50001, &quot;操作失败&quot;);</span>
+
+    /**
+     * 错误码
+     */
+<span class="fc" id="L59">    private final int code;</span>
+
+    /**
+     * 错误信息
+     */
+<span class="fc" id="L64">    private final String message;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

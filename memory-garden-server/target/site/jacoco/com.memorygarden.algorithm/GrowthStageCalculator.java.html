@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GrowthStageCalculator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.algorithm</a> &gt; <span class="el_source">GrowthStageCalculator.java</span></div><h1>GrowthStageCalculator.java</h1><pre class="source lang-java linenums">package com.memorygarden.algorithm;
+
+import com.memorygarden.model.enums.SelfEvaluation;
+
+/**
+ * 植物生长阶段推进计算器
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+public class GrowthStageCalculator {
+
+    /**
+     * 计算复习后的生长阶段
+     *
+     * &lt;p&gt;规则：&lt;/p&gt;
+     * &lt;ul&gt;
+     *   &lt;li&gt;枯萎状态 + 记住了 → 复活（维持当前阶段，解除枯萎）&lt;/li&gt;
+     *   &lt;li&gt;枯萎状态 + 模糊/忘记了 → 仍然枯萎，阶段回退&lt;/li&gt;
+     *   &lt;li&gt;记住了 → 升一级（最高5）&lt;/li&gt;
+     *   &lt;li&gt;模糊 → 维持当前阶段&lt;/li&gt;
+     *   &lt;li&gt;忘记了 → 降一级（最低1）&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param currentStage 当前生长阶段（1~5）
+     * @param evaluation   自评结果
+     * @param isWithered   是否处于枯萎状态
+     * @return 新的生长阶段
+     */
+    public static int calculateNextStage(int currentStage, SelfEvaluation evaluation, boolean isWithered) {
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        if (isWithered) {</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">            if (evaluation == SelfEvaluation.REMEMBERED) {</span>
+                // 枯萎复活：维持当前阶段
+<span class="fc" id="L34">                return currentStage;</span>
+            }
+            // 枯萎+模糊/忘记：仍然枯萎，阶段回退
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">            if (evaluation == SelfEvaluation.FORGOTTEN) {</span>
+<span class="fc" id="L38">                return Math.max(1, currentStage - 1);</span>
+            }
+            // 枯萎+模糊：维持当前阶段（仍枯萎）
+<span class="nc" id="L41">            return currentStage;</span>
+        }
+
+<span class="pc bpc" id="L44" title="1 of 4 branches missed.">        switch (evaluation) {</span>
+            case REMEMBERED:
+                // 记住了→升级，最高5
+<span class="fc" id="L47">                return Math.min(5, currentStage + 1);</span>
+            case VAGUE:
+                // 模糊→维持
+<span class="fc" id="L50">                return currentStage;</span>
+            case FORGOTTEN:
+                // 忘记了→回退，最低1
+<span class="fc" id="L53">                return Math.max(1, currentStage - 1);</span>
+            default:
+<span class="nc" id="L55">                return currentStage;</span>
+        }
+    }
+
+    private GrowthStageCalculator() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

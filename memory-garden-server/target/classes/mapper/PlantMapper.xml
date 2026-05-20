@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.memorygarden.mapper.PlantMapper">
+
+    <resultMap id="BaseResultMap" type="com.memorygarden.model.entity.Plant">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="card_id" property="cardId"/>
+        <result column="growth_stage" property="growthStage"/>
+        <result column="is_withered" property="isWithered"/>
+        <result column="stage_success_count" property="stageSuccessCount"/>
+        <result column="total_review_count" property="totalReviewCount"/>
+        <result column="review_round" property="reviewRound"/>
+        <result column="next_review_date" property="nextReviewDate"/>
+        <result column="last_review_date" property="lastReviewDate"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, card_id, growth_stage, is_withered, stage_success_count,
+        total_review_count, review_round, next_review_date, last_review_date,
+        is_deleted, create_time, update_time
+    </sql>
+
+    <select id="selectAllActive" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_plant
+        WHERE is_withered = 0 AND is_deleted = 0
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_plant
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_plant
+        WHERE user_id = #{userId} AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByCardId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_plant
+        WHERE card_id = #{cardId} AND is_deleted = 0
+    </select>
+
+    <select id="selectWithered" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_plant
+        WHERE user_id = #{userId} AND is_withered = 1 AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="countByStage" resultMap="BaseResultMap">
+        SELECT growth_stage, COUNT(*) as stage_success_count
+        FROM t_plant
+        WHERE user_id = #{userId} AND is_deleted = 0
+        GROUP BY growth_stage
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_plant (user_id, card_id, growth_stage, is_withered, stage_success_count,
+                             total_review_count, review_round, next_review_date, last_review_date, is_deleted)
+        VALUES (#{userId}, #{cardId}, #{growthStage}, #{isWithered}, #{stageSuccessCount},
+                #{totalReviewCount}, #{reviewRound}, #{nextReviewDate}, #{lastReviewDate}, #{isDeleted})
+    </insert>
+
+    <update id="updateById">
+        UPDATE t_plant
+        <set>
+            <if test="growthStage != null">growth_stage = #{growthStage},</if>
+            <if test="isWithered != null">is_withered = #{isWithered},</if>
+            <if test="stageSuccessCount != null">stage_success_count = #{stageSuccessCount},</if>
+            <if test="totalReviewCount != null">total_review_count = #{totalReviewCount},</if>
+            <if test="reviewRound != null">review_round = #{reviewRound},</if>
+            <if test="nextReviewDate != null">next_review_date = #{nextReviewDate},</if>
+            <if test="lastReviewDate != null">last_review_date = #{lastReviewDate},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>

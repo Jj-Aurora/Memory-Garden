@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StudyPackServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.service.impl</a> &gt; <span class="el_source">StudyPackServiceImpl.java</span></div><h1>StudyPackServiceImpl.java</h1><pre class="source lang-java linenums">package com.memorygarden.service.impl;
+
+import com.memorygarden.mapper.KnowledgeCardMapper;
+import com.memorygarden.mapper.PlantMapper;
+import com.memorygarden.mapper.StudyPackItemMapper;
+import com.memorygarden.mapper.StudyPackMapper;
+import com.memorygarden.model.entity.KnowledgeCard;
+import com.memorygarden.model.entity.Plant;
+import com.memorygarden.model.entity.StudyPack;
+import com.memorygarden.model.entity.StudyPackItem;
+import com.memorygarden.service.StudyPackService;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * 预设知识包服务实现类
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+@Service
+public class StudyPackServiceImpl implements StudyPackService {
+
+    private final StudyPackMapper studyPackMapper;
+    private final StudyPackItemMapper studyPackItemMapper;
+    private final KnowledgeCardMapper cardMapper;
+    private final PlantMapper plantMapper;
+
+    public StudyPackServiceImpl(StudyPackMapper studyPackMapper, StudyPackItemMapper studyPackItemMapper,
+<span class="fc" id="L33">                                KnowledgeCardMapper cardMapper, PlantMapper plantMapper) {</span>
+<span class="fc" id="L34">        this.studyPackMapper = studyPackMapper;</span>
+<span class="fc" id="L35">        this.studyPackItemMapper = studyPackItemMapper;</span>
+<span class="fc" id="L36">        this.cardMapper = cardMapper;</span>
+<span class="fc" id="L37">        this.plantMapper = plantMapper;</span>
+<span class="fc" id="L38">    }</span>
+
+    /**
+     * 获取可用知识包列表
+     *
+     * @return 知识包列表
+     */
+    @Override
+    public List&lt;StudyPack&gt; list() {
+<span class="fc" id="L47">        return studyPackMapper.selectAll();</span>
+    }
+
+    /**
+     * 获取知识包详情（含条目预览）
+     *
+     * @param packId 知识包 ID
+     * @return 知识包实体
+     */
+    @Override
+    public StudyPack getDetail(Long packId) {
+<span class="fc" id="L58">        return studyPackMapper.selectById(packId);</span>
+    }
+
+    /**
+     * 获取知识包条目列表
+     *
+     * @param packId 知识包 ID
+     * @return 条目列表
+     */
+    @Override
+    public List&lt;StudyPackItem&gt; getPackItems(Long packId) {
+<span class="fc" id="L69">        return studyPackItemMapper.selectByPackId(packId);</span>
+    }
+
+    /**
+     * 导入知识包到个人花园
+     *
+     * @param userId 用户 ID
+     * @param packId 知识包 ID
+     * @return 导入的卡片数量
+     */
+    @Override
+    public int importPack(Long userId, Long packId) {
+<span class="fc" id="L81">        StudyPack pack = studyPackMapper.selectById(packId);</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if (pack == null) {</span>
+<span class="fc" id="L83">            throw new RuntimeException(&quot;知识包不存在&quot;);</span>
+        }
+
+<span class="fc" id="L86">        List&lt;StudyPackItem&gt; items = studyPackItemMapper.selectByPackId(packId);</span>
+<span class="pc bpc" id="L87" title="1 of 4 branches missed.">        if (items == null || items.isEmpty()) {</span>
+<span class="fc" id="L88">            return 0;</span>
+        }
+
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        for (StudyPackItem item : items) {</span>
+<span class="fc" id="L92">            KnowledgeCard card = new KnowledgeCard();</span>
+<span class="fc" id="L93">            card.setUserId(userId);</span>
+<span class="fc" id="L94">            card.setFrontContent(item.getFrontContent());</span>
+<span class="fc" id="L95">            card.setBackContent(item.getBackContent());</span>
+<span class="fc" id="L96">            card.setSourceType(1);</span>
+<span class="fc" id="L97">            card.setSourcePackId(packId);</span>
+<span class="fc" id="L98">            card.setIsDeleted(0);</span>
+<span class="fc" id="L99">            cardMapper.insert(card);</span>
+
+<span class="fc" id="L101">            Plant plant = new Plant();</span>
+<span class="fc" id="L102">            plant.setCardId(card.getId());</span>
+<span class="fc" id="L103">            plant.setUserId(userId);</span>
+<span class="fc" id="L104">            plant.setGrowthStage(1);</span>
+<span class="fc" id="L105">            plant.setReviewRound(1);</span>
+<span class="fc" id="L106">            plant.setNextReviewDate(LocalDate.now());</span>
+<span class="fc" id="L107">            plant.setIsWithered(0);</span>
+<span class="fc" id="L108">            plant.setIsDeleted(0);</span>
+<span class="fc" id="L109">            plantMapper.insert(plant);</span>
+<span class="fc" id="L110">        }</span>
+
+<span class="fc" id="L112">        return items.size();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

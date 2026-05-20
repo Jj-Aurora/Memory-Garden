@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StudyPack.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.model.entity</a> &gt; <span class="el_source">StudyPack.java</span></div><h1>StudyPack.java</h1><pre class="source lang-java linenums">package com.memorygarden.model.entity;
+
+import lombok.Data;
+
+import java.util.Date;
+
+/**
+ * 预设知识包实体
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+<span class="pc bnc" id="L13" title="All 70 branches missed.">@Data</span>
+public class StudyPack {
+
+    /**
+     * 主键
+     */
+<span class="fc" id="L19">    private Long id;</span>
+
+    /**
+     * 知识包名称
+     */
+<span class="fc" id="L24">    private String name;</span>
+
+    /**
+     * 知识包描述
+     */
+<span class="fc" id="L29">    private String description;</span>
+
+    /**
+     * 建议分类名称
+     */
+<span class="fc" id="L34">    private String categoryName;</span>
+
+    /**
+     * 包含卡片数
+     */
+<span class="fc" id="L39">    private Integer cardCount;</span>
+
+    /**
+     * 软删除：0-未删除，1-已删除
+     */
+<span class="fc" id="L44">    private Integer isDeleted;</span>
+
+    /**
+     * 创建时间
+     */
+<span class="fc" id="L49">    private Date createTime;</span>
+
+    /**
+     * 更新时间
+     */
+<span class="fc" id="L54">    private Date updateTime;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

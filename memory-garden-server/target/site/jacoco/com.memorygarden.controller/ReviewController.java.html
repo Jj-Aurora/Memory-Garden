@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReviewController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.controller</a> &gt; <span class="el_source">ReviewController.java</span></div><h1>ReviewController.java</h1><pre class="source lang-java linenums">package com.memorygarden.controller;
+
+import com.memorygarden.common.result.BaseResponse;
+import com.memorygarden.interceptor.AuthInterceptor;
+import com.memorygarden.model.dto.ReviewSubmitRequest;
+import com.memorygarden.model.vo.ReviewSummaryVO;
+import com.memorygarden.model.vo.ReviewVO;
+import com.memorygarden.service.ReviewService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+/**
+ * 复习控制器
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+@RestController
+@RequestMapping(&quot;/api/review&quot;)
+@Api(tags = &quot;复习模块&quot;)
+<span class="fc" id="L26">public class ReviewController {</span>
+
+    @Resource
+    private ReviewService reviewService;
+
+    /**
+     * 获取今日待复习列表接口。
+     *
+     * &lt;p&gt;用途：前端获取今日到期的复习卡片列表，按日期排序。&lt;/p&gt;
+     *
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为待复习列表
+     */
+    @GetMapping(&quot;/pending&quot;)
+    @ApiOperation(&quot;获取待复习列表&quot;)
+    public BaseResponse&lt;List&lt;ReviewVO&gt;&gt; getPending(HttpServletRequest request) {
+<span class="fc" id="L42">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L43">        List&lt;ReviewVO&gt; list = reviewService.getPending(userId);</span>
+<span class="fc" id="L44">        return BaseResponse.success(list);</span>
+    }
+
+    /**
+     * 获取下一棵待复习植物详情接口。
+     *
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为复习视图对象
+     */
+    @GetMapping(&quot;/next&quot;)
+    @ApiOperation(&quot;获取下一个待复习&quot;)
+    public BaseResponse&lt;ReviewVO&gt; getNext(HttpServletRequest request) {
+<span class="fc" id="L56">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L57">        ReviewVO vo = reviewService.getNext(userId);</span>
+<span class="fc" id="L58">        return BaseResponse.success(vo);</span>
+    }
+
+    /**
+     * 提交复习自评结果接口。
+     *
+     * &lt;p&gt;用途：前端提交自评结果，后端更新植物生长阶段、复习轮次、打卡天数等。&lt;/p&gt;
+     *
+     * @param request HTTP 请求对象
+     * @param req     提交请求体（包含卡片 ID、自评值）
+     * @return 统一返回结构，data 为是否成功
+     */
+    @PostMapping(&quot;/submit&quot;)
+    @ApiOperation(&quot;提交复习自评结果&quot;)
+    public BaseResponse&lt;Boolean&gt; submit(HttpServletRequest request, @RequestBody ReviewSubmitRequest req) {
+<span class="fc" id="L73">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L74">        boolean result = reviewService.submit(userId, req);</span>
+<span class="fc" id="L75">        return BaseResponse.success(result);</span>
+    }
+
+    /**
+     * 获取今日复习完成总结接口。
+     *
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为复习总结
+     */
+    @GetMapping(&quot;/summary&quot;)
+    @ApiOperation(&quot;获取今日复习总结&quot;)
+    public BaseResponse&lt;ReviewSummaryVO&gt; getSummary(HttpServletRequest request) {
+<span class="fc" id="L87">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L88">        ReviewSummaryVO vo = reviewService.getSummary(userId);</span>
+<span class="fc" id="L89">        return BaseResponse.success(vo);</span>
+    }
+
+    /**
+     * 获取待复习数量接口（用于导航栏徽标）。
+     *
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为待复习数量
+     */
+    @GetMapping(&quot;/pending-count&quot;)
+    @ApiOperation(&quot;获取待复习数量&quot;)
+    public BaseResponse&lt;Integer&gt; getPendingCount(HttpServletRequest request) {
+<span class="nc" id="L101">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="nc" id="L102">        int count = reviewService.getPendingCount(userId);</span>
+<span class="nc" id="L103">        return BaseResponse.success(count);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

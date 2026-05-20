@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.memorygarden.mapper.KnowledgeCardMapper">
+
+    <resultMap id="BaseResultMap" type="com.memorygarden.model.entity.KnowledgeCard">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="front_content" property="frontContent"/>
+        <result column="back_content" property="backContent"/>
+        <result column="note" property="note"/>
+        <result column="source_type" property="sourceType"/>
+        <result column="source_pack_id" property="sourcePackId"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, category_id, front_content, back_content, note, source_type,
+        source_pack_id, is_deleted, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_knowledge_card
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_knowledge_card
+        WHERE user_id = #{userId} AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByCategoryId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_knowledge_card
+        WHERE category_id = #{categoryId} AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_knowledge_card (user_id, category_id, front_content, back_content, note,
+                                      source_type, source_pack_id, is_deleted)
+        VALUES (#{userId}, #{categoryId}, #{frontContent}, #{backContent}, #{note},
+                #{sourceType}, #{sourcePackId}, #{isDeleted})
+    </insert>
+
+    <update id="updateById">
+        UPDATE t_knowledge_card
+        <set>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="frontContent != null">front_content = #{frontContent},</if>
+            <if test="backContent != null">back_content = #{backContent},</if>
+            <if test="note != null">note = #{note},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>

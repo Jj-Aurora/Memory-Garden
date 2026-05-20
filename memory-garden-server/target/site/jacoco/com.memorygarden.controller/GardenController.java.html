@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GardenController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.controller</a> &gt; <span class="el_source">GardenController.java</span></div><h1>GardenController.java</h1><pre class="source lang-java linenums">package com.memorygarden.controller;
+
+import com.memorygarden.common.result.BaseResponse;
+import com.memorygarden.interceptor.AuthInterceptor;
+import com.memorygarden.model.vo.GardenVO;
+import com.memorygarden.model.vo.PlantVO;
+import com.memorygarden.service.PlantService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+/**
+ * 花园控制器
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+@RestController
+@RequestMapping(&quot;/api/garden&quot;)
+@Api(tags = &quot;花园模块&quot;)
+<span class="fc" id="L25">public class GardenController {</span>
+
+    @Resource
+    private PlantService plantService;
+
+    /**
+     * 获取花园视图数据接口。
+     *
+     * &lt;p&gt;用途：前端获取花园主页数据，包含所有植物和分组统计。&lt;/p&gt;
+     *
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为花园视图对象
+     */
+    @GetMapping
+    @ApiOperation(&quot;获取花园视图数据&quot;)
+    public BaseResponse&lt;GardenVO&gt; getGardenView(HttpServletRequest request) {
+<span class="fc" id="L41">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L42">        GardenVO vo = plantService.getGardenView(userId);</span>
+<span class="fc" id="L43">        return BaseResponse.success(vo);</span>
+    }
+
+    /**
+     * 按条件筛选植物接口。
+     *
+     * @param categoryId 分类 ID（可选）
+     * @param stage      生长阶段（可选）
+     * @param withered   是否枯萎（可选）
+     * @param request    HTTP 请求对象
+     * @return 统一返回结构，data 为植物列表
+     */
+    @GetMapping(&quot;/filter&quot;)
+    @ApiOperation(&quot;按条件筛选植物&quot;)
+    public BaseResponse&lt;List&lt;PlantVO&gt;&gt; filter(@RequestParam(required = false) Long categoryId,
+                                              @RequestParam(required = false) Integer stage,
+                                              @RequestParam(required = false) Boolean withered,
+                                              HttpServletRequest request) {
+<span class="fc" id="L61">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L62">        List&lt;PlantVO&gt; list = plantService.filter(userId, categoryId, stage, withered);</span>
+<span class="fc" id="L63">        return BaseResponse.success(list);</span>
+    }
+
+    /**
+     * 按条件排序植物接口。
+     *
+     * @param sortBy  排序字段（createTime/nextReviewDate/growthStage）
+     * @param order   排序方向（asc/desc）
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为植物列表
+     */
+    @GetMapping(&quot;/sort&quot;)
+    @ApiOperation(&quot;按条件排序植物&quot;)
+    public BaseResponse&lt;List&lt;PlantVO&gt;&gt; sort(@RequestParam(defaultValue = &quot;createTime&quot;) String sortBy,
+                                            @RequestParam(defaultValue = &quot;asc&quot;) String order,
+                                            HttpServletRequest request) {
+<span class="fc" id="L79">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L80">        List&lt;PlantVO&gt; list = plantService.sort(userId, sortBy, order);</span>
+<span class="fc" id="L81">        return BaseResponse.success(list);</span>
+    }
+
+    /**
+     * 获取枯萎植物列表接口。
+     *
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为枯萎植物列表
+     */
+    @GetMapping(&quot;/withered&quot;)
+    @ApiOperation(&quot;获取枯萎植物列表&quot;)
+    public BaseResponse&lt;List&lt;PlantVO&gt;&gt; getWithered(HttpServletRequest request) {
+<span class="fc" id="L93">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L94">        List&lt;PlantVO&gt; list = plantService.getWithered(userId);</span>
+<span class="fc" id="L95">        return BaseResponse.success(list);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CategoryController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.controller</a> &gt; <span class="el_source">CategoryController.java</span></div><h1>CategoryController.java</h1><pre class="source lang-java linenums">package com.memorygarden.controller;
+
+import com.memorygarden.common.result.BaseResponse;
+import com.memorygarden.interceptor.AuthInterceptor;
+import com.memorygarden.model.dto.CategoryCreateRequest;
+import com.memorygarden.model.entity.Category;
+import com.memorygarden.service.CategoryService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+/**
+ * 分类控制器
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+@RestController
+@RequestMapping(&quot;/api/category&quot;)
+@Api(tags = &quot;分类模块&quot;)
+<span class="fc" id="L25">public class CategoryController {</span>
+
+    @Resource
+    private CategoryService categoryService;
+
+    /**
+     * 创建分类接口。
+     *
+     * &lt;p&gt;用途：前端提交分类信息，后端完成参数校验、落库，返回新分类 id。&lt;/p&gt;
+     *
+     * @param request HTTP 请求对象（用于获取当前登录用户 ID）
+     * @param req     创建请求体（包含分类名称、图标、排序）
+     * @return 统一返回结构，data 为新分类 id
+     */
+    @PostMapping
+    @ApiOperation(&quot;创建分类&quot;)
+    public BaseResponse&lt;Long&gt; create(HttpServletRequest request, @RequestBody CategoryCreateRequest req) {
+<span class="fc" id="L42">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L43">        Long id = categoryService.create(userId, req);</span>
+<span class="fc" id="L44">        return BaseResponse.success(id);</span>
+    }
+
+    /**
+     * 获取当前用户分类列表接口。
+     *
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为分类列表
+     */
+    @GetMapping(&quot;/list&quot;)
+    @ApiOperation(&quot;获取分类列表&quot;)
+    public BaseResponse&lt;List&lt;Category&gt;&gt; list(HttpServletRequest request) {
+<span class="fc" id="L56">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L57">        List&lt;Category&gt; list = categoryService.list(userId);</span>
+<span class="fc" id="L58">        return BaseResponse.success(list);</span>
+    }
+
+    /**
+     * 修改分类接口。
+     *
+     * @param id      分类 ID
+     * @param request HTTP 请求对象
+     * @param req     修改请求体
+     * @return 统一返回结构，data 为是否成功
+     */
+    @PutMapping(&quot;/{id}&quot;)
+    @ApiOperation(&quot;修改分类&quot;)
+    public BaseResponse&lt;Boolean&gt; update(@PathVariable Long id, HttpServletRequest request,
+                                        @RequestBody CategoryCreateRequest req) {
+<span class="fc" id="L73">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L74">        boolean result = categoryService.update(id, userId, req);</span>
+<span class="fc" id="L75">        return BaseResponse.success(result);</span>
+    }
+
+    /**
+     * 删除分类接口（软删除）。
+     *
+     * @param id      分类 ID
+     * @param request HTTP 请求对象
+     * @return 统一返回结构，data 为是否成功
+     */
+    @DeleteMapping(&quot;/{id}&quot;)
+    @ApiOperation(&quot;删除分类&quot;)
+    public BaseResponse&lt;Boolean&gt; delete(@PathVariable Long id, HttpServletRequest request) {
+<span class="fc" id="L88">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L89">        boolean result = categoryService.delete(id, userId);</span>
+<span class="fc" id="L90">        return BaseResponse.success(result);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.controller</a> &gt; <span class="el_source">UserController.java</span></div><h1>UserController.java</h1><pre class="source lang-java linenums">package com.memorygarden.controller;
+
+import com.memorygarden.common.result.BaseResponse;
+import com.memorygarden.interceptor.AuthInterceptor;
+import com.memorygarden.model.dto.UserLoginRequest;
+import com.memorygarden.model.dto.UserRegisterRequest;
+import com.memorygarden.model.vo.UserVO;
+import com.memorygarden.service.UserService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
+
+/**
+ * 用户控制器
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+@RestController
+@RequestMapping(&quot;/api/user&quot;)
+@Api(tags = &quot;用户模块&quot;)
+<span class="fc" id="L26">public class UserController {</span>
+
+    @Resource
+    private UserService userService;
+
+    /**
+     * 用户注册接口。
+     *
+     * &lt;p&gt;用途：前端提交注册信息，后端完成参数校验、落库，并返回新用户 id。&lt;/p&gt;
+     *
+     * @param request 注册请求体（包含用户名、密码、昵称）
+     * @return 统一返回结构，data 为新创建的用户 id
+     */
+    @PostMapping(&quot;/register&quot;)
+    @ApiOperation(&quot;用户注册&quot;)
+    public BaseResponse&lt;Long&gt; register(@RequestBody UserRegisterRequest request) {
+<span class="fc" id="L42">        Long userId = userService.register(request);</span>
+<span class="fc" id="L43">        return BaseResponse.success(userId);</span>
+    }
+
+    /**
+     * 用户登录接口。
+     *
+     * &lt;p&gt;用途：前端提交登录信息，后端校验密码，返回登录 Token。&lt;/p&gt;
+     *
+     * @param request 登录请求体（包含用户名、密码）
+     * @return 统一返回结构，data 为登录 Token
+     */
+    @PostMapping(&quot;/login&quot;)
+    @ApiOperation(&quot;用户登录&quot;)
+    public BaseResponse&lt;String&gt; login(@RequestBody UserLoginRequest request) {
+<span class="fc" id="L57">        String token = userService.login(request);</span>
+<span class="fc" id="L58">        return BaseResponse.success(token);</span>
+    }
+
+    /**
+     * 获取当前登录用户信息接口。
+     *
+     * &lt;p&gt;用途：前端获取当前登录用户的个人信息。&lt;/p&gt;
+     *
+     * @param request HTTP 请求对象（用于获取当前登录用户 ID）
+     * @return 统一返回结构，data 为用户视图对象
+     */
+    @GetMapping(&quot;/current&quot;)
+    @ApiOperation(&quot;获取当前登录用户信息&quot;)
+    public BaseResponse&lt;UserVO&gt; getCurrentUser(HttpServletRequest request) {
+<span class="fc" id="L72">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L73">        UserVO userVO = userService.getCurrentUser(userId);</span>
+<span class="fc" id="L74">        return BaseResponse.success(userVO);</span>
+    }
+
+    /**
+     * 修改个人信息接口。
+     *
+     * &lt;p&gt;用途：前端提交修改后的昵称和头像 URL，后端更新用户信息。&lt;/p&gt;
+     *
+     * @param request    HTTP 请求对象（用于获取当前登录用户 ID）
+     * @param updateBody 修改请求体（包含 nickname、avatarUrl）
+     * @return 统一返回结构，data 为是否成功
+     */
+    @PutMapping(&quot;/profile&quot;)
+    @ApiOperation(&quot;修改个人信息&quot;)
+    public BaseResponse&lt;Boolean&gt; updateProfile(HttpServletRequest request,
+                                               @RequestBody Map&lt;String, String&gt; updateBody) {
+<span class="fc" id="L90">        Long userId = (Long) request.getAttribute(AuthInterceptor.CURRENT_USER_ID);</span>
+<span class="fc" id="L91">        String nickname = updateBody.get(&quot;nickname&quot;);</span>
+<span class="fc" id="L92">        String avatarUrl = updateBody.get(&quot;avatarUrl&quot;);</span>
+<span class="fc" id="L93">        boolean result = userService.updateProfile(userId, nickname, avatarUrl);</span>
+<span class="fc" id="L94">        return BaseResponse.success(result);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

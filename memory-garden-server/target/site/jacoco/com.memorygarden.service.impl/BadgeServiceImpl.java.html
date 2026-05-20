@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BadgeServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.service.impl</a> &gt; <span class="el_source">BadgeServiceImpl.java</span></div><h1>BadgeServiceImpl.java</h1><pre class="source lang-java linenums">package com.memorygarden.service.impl;
+
+import com.memorygarden.algorithm.BadgeEvaluator;
+import com.memorygarden.mapper.BadgeMapper;
+import com.memorygarden.mapper.PlantMapper;
+import com.memorygarden.mapper.UserBadgeMapper;
+import com.memorygarden.mapper.UserMapper;
+import com.memorygarden.model.entity.Badge;
+import com.memorygarden.model.entity.Plant;
+import com.memorygarden.model.entity.User;
+import com.memorygarden.model.entity.UserBadge;
+import com.memorygarden.model.enums.BadgeRarity;
+import com.memorygarden.model.vo.BadgeVO;
+import com.memorygarden.service.BadgeService;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * 徽章服务实现类
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+@Service
+public class BadgeServiceImpl implements BadgeService {
+
+    private final BadgeMapper badgeMapper;
+    private final UserBadgeMapper userBadgeMapper;
+    private final UserMapper userMapper;
+    private final PlantMapper plantMapper;
+
+    public BadgeServiceImpl(BadgeMapper badgeMapper, UserBadgeMapper userBadgeMapper,
+<span class="fc" id="L37">                            UserMapper userMapper, PlantMapper plantMapper) {</span>
+<span class="fc" id="L38">        this.badgeMapper = badgeMapper;</span>
+<span class="fc" id="L39">        this.userBadgeMapper = userBadgeMapper;</span>
+<span class="fc" id="L40">        this.userMapper = userMapper;</span>
+<span class="fc" id="L41">        this.plantMapper = plantMapper;</span>
+<span class="fc" id="L42">    }</span>
+
+    /**
+     * 获取所有徽章列表（含获得状态）
+     *
+     * @param userId 用户 ID
+     * @return 徽章列表
+     */
+    @Override
+    public List&lt;BadgeVO&gt; getAllBadges(Long userId) {
+<span class="fc" id="L52">        List&lt;Badge&gt; allBadges = badgeMapper.selectAll();</span>
+<span class="fc" id="L53">        List&lt;UserBadge&gt; earnedBadges = userBadgeMapper.selectByUserId(userId);</span>
+
+<span class="fc" id="L55">        List&lt;Long&gt; earnedBadgeIds = earnedBadges.stream()</span>
+<span class="fc" id="L56">                .map(UserBadge::getBadgeId)</span>
+<span class="fc" id="L57">                .collect(Collectors.toList());</span>
+
+<span class="fc" id="L59">        List&lt;BadgeVO&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        for (Badge badge : allBadges) {</span>
+<span class="fc" id="L61">            BadgeVO vo = convertToVO(badge);</span>
+<span class="fc" id="L62">            vo.setEarned(earnedBadgeIds.contains(badge.getId()));</span>
+
+<span class="fc bfc" id="L64" title="All 2 branches covered.">            for (UserBadge ub : earnedBadges) {</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">                if (ub.getBadgeId().equals(badge.getId())) {</span>
+<span class="fc" id="L66">                    vo.setEarnedTime(ub.getCreateTime());</span>
+<span class="fc" id="L67">                    break;</span>
+                }
+<span class="fc" id="L69">            }</span>
+
+<span class="fc" id="L71">            result.add(vo);</span>
+<span class="fc" id="L72">        }</span>
+
+<span class="fc" id="L74">        return result;</span>
+    }
+
+    /**
+     * 获取已获得的徽章列表
+     *
+     * @param userId 用户 ID
+     * @return 已获得徽章列表
+     */
+    @Override
+    public List&lt;BadgeVO&gt; getMyBadges(Long userId) {
+<span class="fc" id="L85">        return getAllBadges(userId).stream()</span>
+<span class="fc" id="L86">                .filter(BadgeVO::getEarned)</span>
+<span class="fc" id="L87">                .collect(Collectors.toList());</span>
+    }
+
+    /**
+     * 评估并授予徽章
+     *
+     * @param userId 用户 ID
+     */
+    @Override
+    public void evaluateAndAward(Long userId) {
+<span class="fc" id="L97">        List&lt;Badge&gt; allBadges = badgeMapper.selectAll();</span>
+<span class="fc" id="L98">        User user = userMapper.selectById(userId);</span>
+<span class="fc" id="L99">        List&lt;Plant&gt; plants = plantMapper.selectByUserId(userId);</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        int plantCount = (int) plants.stream().filter(p -&gt; p.getIsDeleted() == 0).count();</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        int streakDays = user != null ? user.getCurrentStreak() : 0;</span>
+
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        for (Badge badge : allBadges) {</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">            if (userBadgeMapper.existsByUserIdAndBadgeId(userId, badge.getId())) {</span>
+<span class="fc" id="L105">                continue;</span>
+            }
+
+<span class="fc" id="L108">            int currentValue = resolveCurrentValue(badge.getConditionType(), plantCount, streakDays, plants);</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">            int conditionValue = badge.getConditionValue() != null ? badge.getConditionValue() : 0;</span>
+<span class="fc" id="L110">            boolean achieved = BadgeEvaluator.evaluate(badge.getConditionType(), currentValue, conditionValue);</span>
+
+<span class="fc bfc" id="L112" title="All 2 branches covered.">            if (achieved) {</span>
+<span class="fc" id="L113">                UserBadge userBadge = new UserBadge();</span>
+<span class="fc" id="L114">                userBadge.setUserId(userId);</span>
+<span class="fc" id="L115">                userBadge.setBadgeId(badge.getId());</span>
+<span class="fc" id="L116">                userBadge.setIsDeleted(0);</span>
+<span class="fc" id="L117">                userBadgeMapper.insert(userBadge);</span>
+            }
+<span class="fc" id="L119">        }</span>
+<span class="fc" id="L120">    }</span>
+
+    /**
+     * 根据条件类型解析当前值
+     *
+     * @param conditionType 条件类型
+     * @param plantCount    植物总数
+     * @param streakDays    连续打卡天数
+     * @param plants        植物列表
+     * @return 当前值
+     */
+    private int resolveCurrentValue(String conditionType, int plantCount, int streakDays, List&lt;Plant&gt; plants) {
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">        if (conditionType == null) {</span>
+<span class="nc" id="L133">            return 0;</span>
+        }
+<span class="pc bpc" id="L135" title="1 of 7 branches missed.">        switch (conditionType) {</span>
+            case &quot;PLANT_FIRST&quot;:
+            case &quot;TOTAL_PLANTS&quot;:
+<span class="fc" id="L138">                return plantCount;</span>
+            case &quot;STREAK_DAYS&quot;:
+<span class="fc" id="L140">                return streakDays;</span>
+            case &quot;BLOOMING_COUNT&quot;:
+<span class="fc" id="L142">                return (int) plants.stream()</span>
+<span class="pc bpc" id="L143" title="2 of 4 branches missed.">                        .filter(p -&gt; p.getIsDeleted() == 0 &amp;&amp; p.getGrowthStage() &gt;= 4)</span>
+<span class="fc" id="L144">                        .count();</span>
+            case &quot;FRUIT_FIRST&quot;:
+<span class="fc" id="L146">                return (int) plants.stream()</span>
+<span class="pc bpc" id="L147" title="2 of 4 branches missed.">                        .filter(p -&gt; p.getIsDeleted() == 0 &amp;&amp; p.getGrowthStage() == 5)</span>
+<span class="fc" id="L148">                        .count();</span>
+            case &quot;REVIVE_COUNT&quot;:
+<span class="fc" id="L150">                return 0;</span>
+            case &quot;CATEGORY_COUNT&quot;:
+<span class="fc" id="L152">                return 0;</span>
+            default:
+<span class="nc" id="L154">                return 0;</span>
+        }
+    }
+
+    /**
+     * 将 Badge 实体转换为 BadgeVO
+     *
+     * @param badge 徽章实体
+     * @return 徽章视图对象
+     */
+    private BadgeVO convertToVO(Badge badge) {
+<span class="fc" id="L165">        BadgeVO vo = new BadgeVO();</span>
+<span class="fc" id="L166">        BeanUtils.copyProperties(badge, vo);</span>
+
+<span class="fc" id="L168">        BadgeRarity rarity = BadgeRarity.fromValue(badge.getRarity());</span>
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">        vo.setRarityName(rarity != null ? rarity.getName() : &quot;未知&quot;);</span>
+
+<span class="fc" id="L171">        return vo;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

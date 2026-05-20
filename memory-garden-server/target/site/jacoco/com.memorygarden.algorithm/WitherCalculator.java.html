@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WitherCalculator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.algorithm</a> &gt; <span class="el_source">WitherCalculator.java</span></div><h1>WitherCalculator.java</h1><pre class="source lang-java linenums">package com.memorygarden.algorithm;
+
+/**
+ * 枯萎判定计算器
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+public class WitherCalculator {
+
+    /**
+     * 枯萎阈值倍数：逾期天数 ≥ 当前间隔 × WITHER_THRESHOLD 则枯萎
+     */
+    private static final int WITHER_THRESHOLD = 3;
+
+    /**
+     * 判断植物是否应该枯萎
+     *
+     * &lt;p&gt;规则：逾期天数 ≥ 当前复习间隔 × 3 → 枯萎&lt;/p&gt;
+     *
+     * @param overdueDays    逾期天数（实际复习日期 - 计划复习日期）
+     * @param currentInterval 当前复习间隔天数
+     * @return true=应该枯萎
+     */
+    public static boolean shouldWither(int overdueDays, int currentInterval) {
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (currentInterval &lt;= 0) {</span>
+<span class="fc" id="L27">            return false;</span>
+        }
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        return overdueDays &gt;= currentInterval * WITHER_THRESHOLD;</span>
+    }
+
+    private WitherCalculator() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

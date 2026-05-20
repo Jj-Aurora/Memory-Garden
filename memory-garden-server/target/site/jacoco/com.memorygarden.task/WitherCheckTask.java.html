@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WitherCheckTask.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.task</a> &gt; <span class="el_source">WitherCheckTask.java</span></div><h1>WitherCheckTask.java</h1><pre class="source lang-java linenums">package com.memorygarden.task;
+
+import com.memorygarden.algorithm.WitherCalculator;
+import com.memorygarden.mapper.PlantMapper;
+import com.memorygarden.model.entity.Plant;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+/**
+ * 枯萎检测定时任务
+ *
+ * &lt;p&gt;每日凌晨扫描所有未枯萎植物，判断是否逾期超过阈值，
+ * 若超过则标记为枯萎状态。&lt;/p&gt;
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+<span class="fc" id="L24">@Slf4j</span>
+@Component
+<span class="fc" id="L26">public class WitherCheckTask {</span>
+
+    @Resource
+    private PlantMapper plantMapper;
+
+    /**
+     * 每日凌晨2点执行枯萎检测
+     * &lt;p&gt;扫描所有未枯萎且未删除的植物，计算逾期天数，
+     * 若逾期天数 &gt;= 当前间隔 × 3，则标记为枯萎。&lt;/p&gt;
+     */
+    @Scheduled(cron = &quot;0 0 2 * * ?&quot;)
+    public void checkWithered() {
+<span class="nc" id="L38">        log.info(&quot;[WitherCheck] 开始枯萎检测...&quot;);</span>
+<span class="nc" id="L39">        LocalDate today = LocalDate.now();</span>
+
+        // 查询所有未枯萎且未删除的植物
+<span class="nc" id="L42">        List&lt;Plant&gt; allPlants = plantMapper.selectAllActive();</span>
+
+<span class="nc" id="L44">        int witheredCount = 0;</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        for (Plant plant : allPlants) {</span>
+            // 计算逾期天数
+<span class="nc" id="L47">            LocalDate nextReviewDate = plant.getNextReviewDate();</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">            if (nextReviewDate == null) {</span>
+<span class="nc" id="L49">                continue;</span>
+            }
+
+<span class="nc" id="L52">            long overdueDays = ChronoUnit.DAYS.between(nextReviewDate, today);</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">            if (overdueDays &lt;= 0) {</span>
+<span class="nc" id="L54">                continue;</span>
+            }
+
+            // 计算当前间隔
+<span class="nc" id="L58">            int currentInterval = com.memorygarden.algorithm.EbbinghausCalculator</span>
+<span class="nc" id="L59">                    .getIntervalDays(plant.getReviewRound());</span>
+
+            // 判断是否应该枯萎
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            if (WitherCalculator.shouldWither((int) overdueDays, currentInterval)) {</span>
+<span class="nc" id="L63">                plant.setWithered(true);</span>
+<span class="nc" id="L64">                plantMapper.updateById(plant);</span>
+<span class="nc" id="L65">                witheredCount++;</span>
+<span class="nc" id="L66">                log.debug(&quot;[WitherCheck] 植物 id={} 已标记枯萎，逾期{}天，间隔{}天&quot;,</span>
+<span class="nc" id="L67">                        plant.getId(), overdueDays, currentInterval);</span>
+            }
+<span class="nc" id="L69">        }</span>
+
+<span class="nc" id="L71">        log.info(&quot;[WitherCheck] 枯萎检测完成，共标记 {} 棵植物枯萎&quot;, witheredCount);</span>
+<span class="nc" id="L72">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

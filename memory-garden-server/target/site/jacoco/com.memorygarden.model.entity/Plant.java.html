@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Plant.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">memory-garden-server</a> &gt; <a href="index.source.html" class="el_package">com.memorygarden.model.entity</a> &gt; <span class="el_source">Plant.java</span></div><h1>Plant.java</h1><pre class="source lang-java linenums">package com.memorygarden.model.entity;
+
+import lombok.Data;
+
+import java.time.LocalDate;
+import java.util.Date;
+
+/**
+ * 植物实体
+ *
+ * @author jLU
+ * @date 2026-05-20
+ */
+<span class="pc bnc" id="L14" title="All 110 branches missed.">@Data</span>
+public class Plant {
+
+    /**
+     * 主键
+     */
+<span class="fc" id="L20">    private Long id;</span>
+
+    /**
+     * 所属用户
+     */
+<span class="fc" id="L25">    private Long userId;</span>
+
+    /**
+     * 关联知识卡片（1:1）
+     */
+<span class="fc" id="L30">    private Long cardId;</span>
+
+    /**
+     * 生长阶段：1-种子，2-发芽，3-成长，4-开花，5-结果
+     */
+<span class="fc" id="L35">    private Integer growthStage;</span>
+
+    /**
+     * 是否枯萎：0-否，1-是
+     */
+<span class="fc" id="L40">    private Integer isWithered;</span>
+
+    /**
+     * 当前阶段成功复习次数
+     */
+<span class="fc" id="L45">    private Integer stageSuccessCount;</span>
+
+    /**
+     * 总复习次数
+     */
+<span class="fc" id="L50">    private Integer totalReviewCount;</span>
+
+    /**
+     * 当前艾宾浩斯复习轮次（0=未复习过）
+     */
+<span class="fc" id="L55">    private Integer reviewRound;</span>
+
+    /**
+     * 下次应复习日期
+     */
+<span class="fc" id="L60">    private LocalDate nextReviewDate;</span>
+
+    /**
+     * 最后复习日期
+     */
+<span class="fc" id="L65">    private LocalDate lastReviewDate;</span>
+
+    /**
+     * 软删除：0-未删除，1-已删除
+     */
+<span class="fc" id="L70">    private Integer isDeleted;</span>
+
+    /**
+     * 创建时间
+     */
+<span class="nc" id="L75">    private Date createTime;</span>
+
+    /**
+     * 更新时间
+     */
+<span class="nc" id="L80">    private Date updateTime;</span>
+
+    /**
+     * 判断植物是否枯萎
+     *
+     * @return true=枯萎
+     */
+    public boolean isWithered() {
+<span class="pc bpc" id="L88" title="1 of 4 branches missed.">        return isWithered != null &amp;&amp; isWithered == 1;</span>
+    }
+
+    /**
+     * 设置枯萎状态
+     *
+     * @param withered true=枯萎，false=恢复
+     */
+    public void setWithered(boolean withered) {
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        this.isWithered = withered ? 1 : 0;</span>
+<span class="fc" id="L98">    }</span>
+
+<span class="fc" id="L100">    public Plant() {</span>
+<span class="fc" id="L101">        this.growthStage = 1;</span>
+<span class="fc" id="L102">        this.isWithered = 0;</span>
+<span class="fc" id="L103">        this.stageSuccessCount = 0;</span>
+<span class="fc" id="L104">        this.totalReviewCount = 0;</span>
+<span class="fc" id="L105">        this.reviewRound = 0;</span>
+<span class="fc" id="L106">        this.isDeleted = 0;</span>
+<span class="fc" id="L107">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.memorygarden.mapper.ReviewRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.memorygarden.model.entity.ReviewRecord">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="card_id" property="cardId"/>
+        <result column="plant_id" property="plantId"/>
+        <result column="self_evaluation" property="selfEvaluation"/>
+        <result column="prev_stage" property="prevStage"/>
+        <result column="after_stage" property="afterStage"/>
+        <result column="prev_round" property="prevRound"/>
+        <result column="after_round" property="afterRound"/>
+        <result column="was_withered" property="wasWithered"/>
+        <result column="scheduled_date" property="scheduledDate"/>
+        <result column="actual_date" property="actualDate"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, card_id, plant_id, self_evaluation, prev_stage, after_stage,
+        prev_round, after_round, was_withered, scheduled_date, actual_date,
+        is_deleted, create_time
+    </sql>
+
+    <select id="selectByCardId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_review_record
+        WHERE card_id = #{cardId} AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByUserIdAndDate" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_review_record
+        WHERE user_id = #{userId} AND actual_date = #{date} AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="countByUserIdAndDate" resultType="int">
+        SELECT COUNT(*)
+        FROM t_review_record
+        WHERE user_id = #{userId} AND actual_date = #{date} AND is_deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_review_record (user_id, card_id, plant_id, self_evaluation, prev_stage,
+                                     after_stage, prev_round, after_round, was_withered,
+                                     scheduled_date, actual_date, is_deleted)
+        VALUES (#{userId}, #{cardId}, #{plantId}, #{selfEvaluation}, #{prevStage},
+                #{afterStage}, #{prevRound}, #{afterRound}, #{wasWithered},
+                #{scheduledDate}, #{actualDate}, #{isDeleted})
+    </insert>
+
+</mapper>

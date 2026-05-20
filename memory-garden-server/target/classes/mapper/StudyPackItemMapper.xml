@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.memorygarden.mapper.StudyPackItemMapper">
+
+    <resultMap id="BaseResultMap" type="com.memorygarden.model.entity.StudyPackItem">
+        <id column="id" property="id"/>
+        <result column="pack_id" property="packId"/>
+        <result column="front_content" property="frontContent"/>
+        <result column="back_content" property="backContent"/>
+        <result column="note" property="note"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, pack_id, front_content, back_content, note, sort_order, is_deleted, create_time
+    </sql>
+
+    <select id="selectByPackId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_study_pack_item
+        WHERE pack_id = #{packId} AND is_deleted = 0
+        ORDER BY sort_order ASC, id ASC
+    </select>
+
+</mapper>
