@@ -4,6 +4,7 @@ import com.memorygarden.mapper.KnowledgeCardMapper;
 import com.memorygarden.mapper.PlantMapper;
 import com.memorygarden.mapper.ReviewRecordMapper;
 import com.memorygarden.mapper.UserMapper;
+import com.memorygarden.model.entity.KnowledgeCard;
 import com.memorygarden.model.entity.Plant;
 import com.memorygarden.model.entity.ReviewRecord;
 import com.memorygarden.model.entity.User;
@@ -40,6 +41,9 @@ class StatsServiceImplTest {
     private PlantMapper plantMapper;
 
     @Mock
+    private KnowledgeCardMapper cardMapper;
+
+    @Mock
     private ReviewRecordMapper reviewRecordMapper;
 
     @InjectMocks
@@ -48,6 +52,7 @@ class StatsServiceImplTest {
     private User user;
     private Plant plant1;
     private Plant plant2;
+    private KnowledgeCard card1;
     private ReviewRecord record1;
 
     @BeforeEach
@@ -70,6 +75,10 @@ class StatsServiceImplTest {
         plant2.setIsWithered(0);
         plant2.setIsDeleted(0);
 
+        card1 = new KnowledgeCard();
+        card1.setId(1L);
+        card1.setIsDeleted(0);
+
         record1 = new ReviewRecord();
         record1.setSelfEvaluation(1);
         record1.setPrevStage(1);
@@ -84,6 +93,7 @@ class StatsServiceImplTest {
         when(userMapper.selectById(100L)).thenReturn(user);
         when(reviewRecordMapper.selectByUserIdAndDate(eq(100L), any(LocalDate.class)))
                 .thenReturn(Collections.singletonList(record1));
+        when(cardMapper.selectByUserId(100L)).thenReturn(Collections.singletonList(card1));
         when(plantMapper.selectByUserId(100L)).thenReturn(Arrays.asList(plant1, plant2));
 
         StatsVO stats = statsService.getToday(100L);
@@ -92,6 +102,8 @@ class StatsServiceImplTest {
         assertEquals(5, stats.getCurrentStreak());
         assertEquals(10, stats.getMaxStreak());
         assertEquals(1, stats.getTodayReviewCount());
+        assertEquals(1, stats.getTotalCardCount());
+        assertEquals(2, stats.getTotalPlantCount());
     }
 
     // ========== A-54: getTrend / getStreak / getStageDistribution 测试 ==========

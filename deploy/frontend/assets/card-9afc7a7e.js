@@ -1,0 +1,1 @@
+import{p as a,g as t,a as d,d as c}from"./request-c2676919.js";const p={create(r){return a("/card",r)},getById(r){return t(`/card/${r}`)},list(r){return t("/card/list",{categoryId:r})},update(r,e){return d(`/card/${r}`,e)},delete(r){return c(`/card/${r}`)}};export{p as c};

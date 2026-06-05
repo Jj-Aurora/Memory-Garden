@@ -1,7 +1,19 @@
 <template>
   <div class="register-page">
+    <div class="register-bg-decoration">
+      <div class="deco-circle deco-1"></div>
+      <div class="deco-circle deco-2"></div>
+    </div>
     <div class="register-card">
-      <h2 class="register-title">注册记忆花园</h2>
+      <div class="register-brand">
+        <svg class="brand-logo" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="22" stroke="var(--color-primary)" stroke-width="2.5" />
+          <path d="M24 10c-5 0-10 5-10 10s5 10 10 10 10-5 10-10-5-10-10-10z" fill="var(--color-primary-bg)"
+            stroke="var(--color-primary)" stroke-width="1.5" />
+          <path d="M24 30v8M20 34h8" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <h2 class="register-title">注册记忆花园</h2>
+      </div>
       <p class="register-subtitle">开始你的知识花园之旅</p>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="0" @submit.prevent="handleRegister">
         <el-form-item prop="username">
@@ -101,44 +113,110 @@ async function handleRegister() {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+  background: linear-gradient(145deg, #e8f5e9 0%, #c8e6c9 40%, #a5d6a7 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.register-bg-decoration {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.deco-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
+
+  &.deco-1 {
+    width: 350px;
+    height: 350px;
+    background: var(--color-primary);
+    bottom: -100px;
+    right: -80px;
+  }
+
+  &.deco-2 {
+    width: 250px;
+    height: 250px;
+    background: var(--color-primary-light);
+    top: -60px;
+    left: -60px;
+  }
 }
 
 .register-card {
-  width: 400px;
-  padding: 40px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  width: 420px;
+  padding: var(--space-3xl);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  position: relative;
+  z-index: 1;
+}
+
+.register-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.brand-logo {
+  width: 36px;
+  height: 36px;
 }
 
 .register-title {
   text-align: center;
-  font-size: 24px;
-  color: #2d8c3c;
-  margin: 0 0 8px;
+  font-size: var(--font-size-xl);
+  color: var(--color-primary);
+  margin: 0;
+  font-weight: var(--font-weight-bold);
 }
 
 .register-subtitle {
   text-align: center;
-  color: #909399;
-  font-size: 14px;
-  margin: 0 0 32px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--space-2xl);
 }
 
 .register-btn {
   width: 100%;
+  height: var(--touch-min);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-md);
 }
 
 .register-footer {
   text-align: center;
-  font-size: 14px;
-  color: #909399;
-  margin-top: 16px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: var(--space-lg);
 
   .link {
-    color: #2d8c3c;
-    font-weight: 500;
+    color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
+    transition: opacity var(--transition-fast);
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .register-card {
+    width: calc(100% - 32px);
+    padding: var(--space-xl);
+    margin: var(--space-base);
   }
 }
 </style>

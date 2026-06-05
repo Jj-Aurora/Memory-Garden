@@ -2,6 +2,8 @@ package com.memorygarden.service.impl;
 
 import com.memorygarden.algorithm.EbbinghausCalculator;
 import com.memorygarden.algorithm.GrowthStageCalculator;
+import com.memorygarden.common.exception.BusinessException;
+import com.memorygarden.common.result.ResultCode;
 import com.memorygarden.mapper.KnowledgeCardMapper;
 import com.memorygarden.mapper.PlantMapper;
 import com.memorygarden.mapper.ReviewRecordMapper;
@@ -14,6 +16,7 @@ import com.memorygarden.model.entity.User;
 import com.memorygarden.model.enums.SelfEvaluation;
 import com.memorygarden.model.vo.ReviewSummaryVO;
 import com.memorygarden.model.vo.ReviewVO;
+import com.memorygarden.service.BadgeService;
 import com.memorygarden.service.ReviewService;
 import org.springframework.stereotype.Service;
 
@@ -35,13 +38,16 @@ public class ReviewServiceImpl implements ReviewService {
     private final KnowledgeCardMapper cardMapper;
     private final ReviewRecordMapper reviewRecordMapper;
     private final UserMapper userMapper;
+    private final BadgeService badgeService;
 
     public ReviewServiceImpl(PlantMapper plantMapper, KnowledgeCardMapper cardMapper,
-                             ReviewRecordMapper reviewRecordMapper, UserMapper userMapper) {
+                             ReviewRecordMapper reviewRecordMapper, UserMapper userMapper,
+                             BadgeService badgeService) {
         this.plantMapper = plantMapper;
         this.cardMapper = cardMapper;
         this.reviewRecordMapper = reviewRecordMapper;
         this.userMapper = userMapper;
+        this.badgeService = badgeService;
     }
 
     /**
@@ -86,18 +92,18 @@ public class ReviewServiceImpl implements ReviewService {
     public boolean submit(Long userId, ReviewSubmitRequest request) {
         Plant plant = plantMapper.selectByCardId(request.getCardId());
         if (plant == null || plant.getIsDeleted() == 1) {
-            throw new RuntimeException("植物不存在");
+            throw new BusinessException(ResultCode.NOT_FOUND_ERROR, "植物不存在");
         }
 
         KnowledgeCard card = cardMapper.selectById(request.getCardId());
         if (card == null || card.getIsDeleted() == 1) {
-            throw new RuntimeException("卡片不存在");
+            throw new BusinessException(ResultCode.NOT_FOUND_ERROR, "卡片不存在");
         }
 
         int evalValue = request.getSelfEvaluation();
         SelfEvaluation evaluation = SelfEvaluation.fromValue(evalValue);
         if (evaluation == null) {
-            throw new RuntimeException("无效的自评值");
+            throw new BusinessException(ResultCode.PARAMS_ERROR, "无效的自评值");
         }
 
         int stageBefore = plant.getGrowthStage();
@@ -137,6 +143,7 @@ public class ReviewServiceImpl implements ReviewService {
         plant.setReviewRound(newRound);
         plant.setTotalReviewCount(plant.getTotalReviewCount() + 1);
         plant.setNextReviewDate(nextReviewDate);
+        plant.setLastReviewDate(LocalDate.now());
         plantMapper.updateById(plant);
 
         ReviewRecord record = new ReviewRecord();
@@ -155,6 +162,8 @@ public class ReviewServiceImpl implements ReviewService {
         reviewRecordMapper.insert(record);
 
         updateCheckIn(userId);
+
+        badgeService.evaluateAndAward(userId);
 
         return true;
     }

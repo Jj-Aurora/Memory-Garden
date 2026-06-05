@@ -62,8 +62,18 @@ public class StatsServiceImpl implements StatsService {
         int totalCardCount = (int) cards.stream().filter(c -> c.getIsDeleted() == 0).count();
         int totalPlantCount = (int) plants.stream().filter(p -> p.getIsDeleted() == 0).count();
 
+        LocalDate today = LocalDate.now();
+        int todayNewCards = (int) cards.stream()
+                .filter(c -> c.getIsDeleted() == 0 && c.getCreateTime() != null)
+                .filter(c -> {
+                    LocalDate createdDate = c.getCreateTime().toInstant()
+                            .atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+                    return createdDate.equals(today);
+                })
+                .count();
+
         StatsVO vo = new StatsVO();
-        vo.setTodayNewCards(0);
+        vo.setTodayNewCards(todayNewCards);
         vo.setTodayReviewCount(todayRecords.size());
         vo.setTodayDegradedCount(todayDegraded);
         vo.setCurrentStreak(user != null ? user.getCurrentStreak() : 0);

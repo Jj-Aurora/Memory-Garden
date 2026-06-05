@@ -1,5 +1,7 @@
 package com.memorygarden.service.impl;
 
+import com.memorygarden.common.exception.BusinessException;
+import com.memorygarden.common.result.ResultCode;
 import com.memorygarden.mapper.CategoryMapper;
 import com.memorygarden.mapper.KnowledgeCardMapper;
 import com.memorygarden.mapper.PlantMapper;
@@ -46,16 +48,16 @@ public class KnowledgeCardServiceImpl implements KnowledgeCardService {
     @Override
     public Long create(Long userId, CardCreateRequest request) {
         if (request.getFrontContent() == null || request.getFrontContent().trim().isEmpty()) {
-            throw new RuntimeException("正面内容不能为空");
+            throw new BusinessException(ResultCode.PARAMS_ERROR, "正面内容不能为空");
         }
         if (request.getBackContent() == null || request.getBackContent().trim().isEmpty()) {
-            throw new RuntimeException("背面内容不能为空");
+            throw new BusinessException(ResultCode.PARAMS_ERROR, "背面内容不能为空");
         }
 
         if (request.getCategoryId() != null) {
             Category category = categoryMapper.selectById(request.getCategoryId());
             if (category == null || category.getIsDeleted() == 1) {
-                throw new RuntimeException("分类不存在");
+                throw new BusinessException(ResultCode.NOT_FOUND_ERROR, "分类不存在");
             }
         }
 
@@ -74,7 +76,7 @@ public class KnowledgeCardServiceImpl implements KnowledgeCardService {
         plant.setCardId(card.getId());
         plant.setUserId(userId);
         plant.setGrowthStage(1);
-        plant.setReviewRound(1);
+        plant.setReviewRound(0);
         plant.setNextReviewDate(LocalDate.now());
         plant.setIsWithered(0);
         plant.setIsDeleted(0);
@@ -95,7 +97,10 @@ public class KnowledgeCardServiceImpl implements KnowledgeCardService {
     public CardVO getById(Long id, Long userId) {
         KnowledgeCard card = cardMapper.selectById(id);
         if (card == null || card.getIsDeleted() == 1) {
-            throw new RuntimeException("卡片不存在");
+            throw new BusinessException(ResultCode.NOT_FOUND_ERROR, "卡片不存在");
+        }
+        if (!card.getUserId().equals(userId)) {
+            throw new BusinessException(ResultCode.NO_AUTH_ERROR, "无权访问该卡片");
         }
 
         CardVO vo = new CardVO();
@@ -122,6 +127,13 @@ public class KnowledgeCardServiceImpl implements KnowledgeCardService {
     public List<CardVO> list(Long userId, Long categoryId) {
         List<KnowledgeCard> cards;
         if (categoryId != null) {
+            Category category = categoryMapper.selectById(categoryId);
+            if (category == null || category.getIsDeleted() == 1) {
+                throw new BusinessException(ResultCode.NOT_FOUND_ERROR, "分类不存在");
+            }
+            if (!category.getUserId().equals(userId)) {
+                throw new BusinessException(ResultCode.NO_AUTH_ERROR, "无权访问该分类");
+            }
             cards = cardMapper.selectByCategoryId(categoryId);
         } else {
             cards = cardMapper.selectByUserId(userId);
@@ -160,10 +172,10 @@ public class KnowledgeCardServiceImpl implements KnowledgeCardService {
     public boolean update(Long id, Long userId, CardUpdateRequest request) {
         KnowledgeCard card = cardMapper.selectById(id);
         if (card == null || card.getIsDeleted() == 1) {
-            throw new RuntimeException("卡片不存在");
+            throw new BusinessException(ResultCode.NOT_FOUND_ERROR, "卡片不存在");
         }
         if (!card.getUserId().equals(userId)) {
-            throw new RuntimeException("无权操作");
+            throw new BusinessException(ResultCode.NO_AUTH_ERROR, "无权操作");
         }
 
         if (request.getCategoryId() != null) {
@@ -193,10 +205,10 @@ public class KnowledgeCardServiceImpl implements KnowledgeCardService {
     public boolean delete(Long id, Long userId) {
         KnowledgeCard card = cardMapper.selectById(id);
         if (card == null || card.getIsDeleted() == 1) {
-            throw new RuntimeException("卡片不存在");
+            throw new BusinessException(ResultCode.NOT_FOUND_ERROR, "卡片不存在");
         }
         if (!card.getUserId().equals(userId)) {
-            throw new RuntimeException("无权操作");
+            throw new BusinessException(ResultCode.NO_AUTH_ERROR, "无权操作");
         }
 
         card.setIsDeleted(1);

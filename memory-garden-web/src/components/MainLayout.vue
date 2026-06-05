@@ -1,9 +1,13 @@
 <template>
   <div class="main-layout">
     <Navbar />
-    <div class="main-content">
-      <router-view />
-    </div>
+    <main class="main-content">
+      <router-view v-slot="{ Component }">
+        <transition name="page-fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
+    </main>
   </div>
 </template>
 
@@ -16,15 +20,33 @@ import Navbar from './Navbar.vue'
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f5f7f0;
+  background-color: var(--color-bg-page);
 }
 
 .main-content {
   flex: 1;
-  padding: 24px;
-  max-width: 1200px;
+  padding: var(--content-padding);
+  padding-top: var(--space-xl);
+  max-width: var(--content-max-width);
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
+}
+
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.page-fade-enter-from,
+.page-fade-leave-to {
+  opacity: 0;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: var(--space-base);
+    padding-top: var(--space-lg);
+  }
 }
 </style>

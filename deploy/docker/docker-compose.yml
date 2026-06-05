@@ -1,0 +1,51 @@
+# ============================================================
+# Docker Compose - 记忆花园 (Memory Garden)
+# 使用方式: docker compose up -d
+# ============================================================
+
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: memory-garden-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-memorygarden2026}
+      MYSQL_DATABASE: memory_garden
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ../sql/memory_garden.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: ../../
+      dockerfile: deploy/docker/Dockerfile
+    container_name: memory-garden-app
+    restart: unless-stopped
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/memory_garden?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD:-memorygarden2026}
+      JWT_SECRET: ${JWT_SECRET:-please-change-this-to-a-strong-random-secret-in-production}
+      SWAGGER_ENABLE: ${SWAGGER_ENABLE:-false}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      # 外部配置挂载（可选，覆盖 jar 内配置）
+      - ../config:/app/config:ro
+
+volumes:
+  mysql-data:

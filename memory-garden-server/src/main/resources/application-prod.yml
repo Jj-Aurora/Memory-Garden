@@ -1,0 +1,28 @@
+# ============================================================
+# 生产环境配置 - 所有敏感值通过环境变量注入
+# 本文件仅定义占位符和默认值，不含任何真实密钥
+# ============================================================
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL:jdbc:mysql://localhost:3306/memory_garden?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+# JWT 密钥（生产环境必须通过环境变量 JWT_SECRET 注入强随机密钥）
+jwt:
+  secret: ${JWT_SECRET:}
+
+# 日志级别
+logging:
+  level:
+    com.memorygarden: info
+    root: warn
+
+# 关闭 Swagger（生产环境可选关闭）
+knife4j:
+  enable: ${SWAGGER_ENABLE:false}

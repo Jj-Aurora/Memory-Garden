@@ -1,5 +1,6 @@
 <template>
-  <div class="plant-card" :class="{ 'is-withered': plant.withered, 'is-pending': isPending }" @click="$emit('click')">
+  <div class="plant-card" :class="{ 'is-withered': plant.withered, 'is-pending': isPending }" @click="$emit('click')"
+    tabindex="0" role="button" :aria-label="`编辑卡片: ${plant.cardFrontContent}`">
     <div class="plant-card-header">
       <PlantStageIcon :stage="plant.growthStage" :withered="plant.withered" />
       <span class="plant-stage-name">{{ plant.growthStageName }}</span>
@@ -11,8 +12,8 @@
       </p>
     </div>
     <div class="plant-card-footer">
-      <span v-if="plant.withered" class="withered-badge">已枯萎</span>
-      <span v-else-if="isPending" class="pending-badge">待复习</span>
+      <span v-if="plant.withered" class="status-badge withered">已枯萎</span>
+      <span v-else-if="isPending" class="status-badge pending">待复习</span>
       <span class="review-info">第{{ plant.reviewRound }}轮</span>
     </div>
   </div>
@@ -43,53 +44,78 @@ const isPending = computed(() => {
 
 <style scoped lang="scss">
 .plant-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-base);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal);
   border: 2px solid transparent;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  min-height: 140px;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--color-primary-lighter);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: translateY(-1px);
   }
 
   &.is-withered {
-    border-color: #c0c4cc;
-    opacity: 0.7;
+    border-color: var(--color-border);
+    opacity: 0.75;
 
     .plant-card-header {
       filter: grayscale(0.6);
     }
+
+    &:hover {
+      border-color: var(--color-withered);
+      box-shadow: 0 4px 16px rgba(158, 158, 158, 0.15);
+    }
   }
 
   &.is-pending {
-    border-color: #e6a23c;
-    box-shadow: 0 2px 12px rgba(230, 162, 60, 0.2);
+    border-color: var(--color-accent-warm);
+    box-shadow: 0 2px 12px rgba(255, 152, 0, 0.15);
+
+    &:hover {
+      border-color: var(--color-accent-warm);
+      box-shadow: 0 6px 20px rgba(255, 152, 0, 0.2);
+    }
   }
 
   &-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
   }
 
   &-stage-name {
-    font-size: 13px;
-    color: #909399;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-medium);
   }
 
   &-body {
-    margin-bottom: 8px;
+    flex: 1;
+    margin-bottom: var(--space-sm);
   }
 
   &-title {
-    font-size: 14px;
-    color: #303133;
-    line-height: 1.5;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    line-height: var(--line-height-normal);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -97,29 +123,35 @@ const isPending = computed(() => {
   }
 
   &-category {
-    margin-top: 6px;
+    margin-top: var(--space-xs);
   }
 
   &-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 12px;
-    color: #909399;
+    font-size: var(--font-size-xs);
   }
 }
 
-.withered-badge {
-  color: #f56c6c;
-  font-weight: 500;
-}
+.status-badge {
+  font-weight: var(--font-weight-semibold);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
 
-.pending-badge {
-  color: #e6a23c;
-  font-weight: 500;
+  &.withered {
+    color: var(--color-accent-danger);
+    background: var(--color-accent-danger-light);
+  }
+
+  &.pending {
+    color: var(--color-accent-warm);
+    background: var(--color-accent-warm-light);
+  }
 }
 
 .review-info {
-  color: #909399;
+  color: var(--color-text-muted);
 }
 </style>

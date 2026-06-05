@@ -2,6 +2,7 @@ package com.memorygarden.service.impl;
 
 import com.memorygarden.mapper.KnowledgeCardMapper;
 import com.memorygarden.mapper.PlantMapper;
+import com.memorygarden.mapper.StudyPackImportMapper;
 import com.memorygarden.mapper.StudyPackItemMapper;
 import com.memorygarden.mapper.StudyPackMapper;
 import com.memorygarden.model.entity.KnowledgeCard;
@@ -44,6 +45,9 @@ class StudyPackServiceImplTest {
 
     @Mock
     private PlantMapper plantMapper;
+
+    @Mock
+    private StudyPackImportMapper studyPackImportMapper;
 
     @InjectMocks
     private StudyPackServiceImpl studyPackService;
@@ -113,6 +117,7 @@ class StudyPackServiceImplTest {
     @DisplayName("导入知识包-批量创建卡片+植物")
     void testImportPack() {
         when(studyPackMapper.selectById(1L)).thenReturn(pack1);
+        when(studyPackImportMapper.existsByUserIdAndPackId(100L, 1L)).thenReturn(false);
         when(studyPackItemMapper.selectByPackId(1L)).thenReturn(Arrays.asList(item1, item2));
         when(cardMapper.insert(any(KnowledgeCard.class))).thenReturn(1);
         when(plantMapper.insert(any(Plant.class))).thenReturn(1);
@@ -122,6 +127,7 @@ class StudyPackServiceImplTest {
         assertEquals(2, count);
         verify(cardMapper, times(2)).insert(any(KnowledgeCard.class));
         verify(plantMapper, times(2)).insert(any(Plant.class));
+        verify(studyPackImportMapper).insert(any());
     }
 
     @Test
@@ -137,9 +143,23 @@ class StudyPackServiceImplTest {
     }
 
     @Test
+    @DisplayName("导入知识包-重复导入抛异常")
+    void testImportPack_DuplicateImport() {
+        when(studyPackMapper.selectById(1L)).thenReturn(pack1);
+        when(studyPackImportMapper.existsByUserIdAndPackId(100L, 1L)).thenReturn(true);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            studyPackService.importPack(100L, 1L);
+        });
+
+        assertTrue(exception.getMessage().contains("已导入"));
+    }
+
+    @Test
     @DisplayName("导入知识包-空条目返回0")
     void testImportPack_EmptyItems() {
         when(studyPackMapper.selectById(1L)).thenReturn(pack1);
+        when(studyPackImportMapper.existsByUserIdAndPackId(100L, 1L)).thenReturn(false);
         when(studyPackItemMapper.selectByPackId(1L)).thenReturn(Collections.emptyList());
 
         int count = studyPackService.importPack(100L, 1L);

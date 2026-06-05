@@ -113,7 +113,7 @@ class KnowledgeCardServiceImplTest {
             verify(plantMapper).insert(argThat(plant ->
                     plant.getGrowthStage() == 1 &&
                     plant.getIsWithered() == 0 &&
-                    plant.getReviewRound() == 1 &&
+                    plant.getReviewRound() == 0 &&
                     plant.getIsDeleted() == 0
             ));
         }

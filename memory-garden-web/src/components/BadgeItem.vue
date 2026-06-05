@@ -53,15 +53,20 @@ function formatDate(dateStr: string) {
 .badge-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
-  border-radius: 12px;
-  background: #fff;
-  border: 1px solid #ebeef5;
-  transition: all 0.3s ease;
+  gap: var(--space-base);
+  padding: var(--space-base);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--transition-normal);
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-primary);
+    transform: translateY(-1px);
+  }
+
+  &.is-earned {
+    border-color: var(--color-primary-lighter);
   }
 
   &.is-locked {
@@ -71,28 +76,28 @@ function formatDate(dateStr: string) {
 }
 
 .badge-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 
   &.common {
-    background: linear-gradient(135deg, #e0e0e0, #bdbdbd);
+    background: linear-gradient(135deg, var(--color-rarity-common-bg), #cfd8dc);
   }
 
   &.rare {
-    background: linear-gradient(135deg, #64b5f6, #1976d2);
+    background: linear-gradient(135deg, var(--color-rarity-rare-bg), #bbdefb);
   }
 
   &.epic {
-    background: linear-gradient(135deg, #ce93d8, #7b1fa2);
+    background: linear-gradient(135deg, var(--color-rarity-epic-bg), #e1bee7);
   }
 
   .badge-emoji {
-    font-size: 28px;
+    font-size: 26px;
   }
 }
 
@@ -102,43 +107,61 @@ function formatDate(dateStr: string) {
 }
 
 .badge-name {
-  font-size: 15px;
-  font-weight: 600;
-  color: #303133;
-  margin: 0 0 4px;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-xs);
 }
 
 .badge-desc {
-  font-size: 13px;
-  color: #909399;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
   margin: 0;
 }
 
 .badge-time {
-  font-size: 12px;
-  color: #67c23a;
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+  margin-top: var(--space-xs);
+  display: inline-block;
 }
 
 .badge-rarity {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 4px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
   flex-shrink: 0;
 
   &.common {
-    background: #f5f5f5;
-    color: #757575;
+    background: var(--color-rarity-common-bg);
+    color: var(--color-rarity-common);
   }
 
   &.rare {
-    background: #e3f2fd;
-    color: #1565c0;
+    background: var(--color-rarity-rare-bg);
+    color: var(--color-rarity-rare);
   }
 
   &.epic {
-    background: #f3e5f5;
-    color: #6a1b9a;
+    background: var(--color-rarity-epic-bg);
+    color: var(--color-rarity-epic);
+  }
+}
+
+@media (max-width: 480px) {
+  .badge-item {
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+  }
+
+  .badge-icon {
+    width: 44px;
+    height: 44px;
+
+    .badge-emoji {
+      font-size: 22px;
+    }
   }
 }
 </style>

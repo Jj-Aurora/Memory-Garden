@@ -234,7 +234,7 @@ INSERT INTO `t_plant` VALUES (27, 2, 27, 2, 1, 0, 1, 1, '2026-05-18', '2026-05-1
 INSERT INTO `t_plant` VALUES (28, 2, 28, 1, 0, 0, 0, 0, '2026-05-20', NULL, 0, '2026-05-20 22:19:15', '2026-05-20 22:19:15');
 INSERT INTO `t_plant` VALUES (29, 3, 29, 2, 0, 0, 1, 1, '2026-05-22', '2026-05-20', 0, '2026-05-20 22:19:15', '2026-05-20 23:41:35');
 INSERT INTO `t_plant` VALUES (30, 3, 30, 2, 0, 0, 1, 1, '2026-05-22', '2026-05-20', 0, '2026-05-20 22:19:15', '2026-05-20 23:41:35');
-INSERT INTO `t_plant` VALUES (31, 3, 31, 3, 1, 0, 2, 2, '2026-05-17', '2026-05-13', 0, '2026-05-20 22:19:15', '2026-05-20 23:39:57');
+INSERT INTO `t_plant` VALUES (31, 3, 31, 3, 0, 0, 2, 2, '2026-05-17', '2026-05-13', 0, '2026-05-20 22:19:15', '2026-05-20 23:39:57');
 INSERT INTO `t_plant` VALUES (32, 3, 32, 2, 0, 0, 1, 1, '2026-05-22', '2026-05-20', 0, '2026-05-20 22:26:32', '2026-05-20 23:41:35');
 INSERT INTO `t_plant` VALUES (33, 3, 33, 3, 0, 0, 2, 2, '2026-05-24', '2026-05-20', 0, '2026-05-20 22:26:32', '2026-05-20 23:41:35');
 INSERT INTO `t_plant` VALUES (34, 3, 34, 2, 0, 0, 1, 1, '2026-05-20', '2026-05-18', 0, '2026-05-20 22:26:32', '2026-05-20 22:42:14');
@@ -249,7 +249,7 @@ INSERT INTO `t_plant` VALUES (42, 3, 42, 2, 0, 0, 1, 1, '2026-05-20', '2026-05-1
 INSERT INTO `t_plant` VALUES (43, 3, 43, 3, 0, 0, 2, 2, '2026-05-20', '2026-05-18', 0, '2026-05-20 22:42:14', '2026-05-20 22:42:14');
 INSERT INTO `t_plant` VALUES (44, 3, 44, 4, 0, 0, 4, 4, '2026-06-04', '2026-05-18', 0, '2026-05-20 22:42:14', '2026-05-20 22:42:14');
 INSERT INTO `t_plant` VALUES (45, 3, 45, 2, 0, 0, 1, 1, '2026-05-22', '2026-05-20', 0, '2026-05-20 22:42:14', '2026-05-20 23:41:35');
-INSERT INTO `t_plant` VALUES (46, 3, 46, 3, 1, 0, 2, 2, '2026-05-17', '2026-05-14', 0, '2026-05-20 22:42:14', '2026-05-20 23:39:57');
+INSERT INTO `t_plant` VALUES (46, 3, 46, 3, 0, 0, 2, 2, '2026-05-17', '2026-05-14', 0, '2026-05-20 22:42:14', '2026-05-20 23:39:57');
 INSERT INTO `t_plant` VALUES (47, 3, 47, 1, 0, 0, 0, 0, '2026-05-20', NULL, 0, '2026-05-20 22:42:14', '2026-05-20 22:42:14');
 INSERT INTO `t_plant` VALUES (48, 3, 48, 1, 0, 0, 0, 0, '2026-05-20', NULL, 0, '2026-05-20 22:42:14', '2026-05-20 22:42:14');
 INSERT INTO `t_plant` VALUES (49, 3, 49, 2, 0, 0, 1, 1, '2026-05-20', '2026-05-18', 0, '2026-05-20 22:42:14', '2026-05-20 22:42:14');
@@ -602,5 +602,46 @@ INSERT INTO `t_user_badge` VALUES (6, 3, 1, 0, '2026-05-20 22:42:14');
 INSERT INTO `t_user_badge` VALUES (7, 3, 4, 0, '2026-05-20 22:42:14');
 INSERT INTO `t_user_badge` VALUES (8, 3, 7, 0, '2026-05-20 22:42:14');
 INSERT INTO `t_user_badge` VALUES (9, 3, 5, 0, '2026-05-20 22:42:14');
+
+-- ============================
+-- 刷新 lujun 用户数据（恢复植物活力）
+-- 长期未使用系统导致植物枯萎，执行以下更新恢复植物状态
+-- 使用 CURDATE() 动态计算日期，确保每次加载SQL时日期都是新鲜的
+-- 艾宾浩斯间隔：round0→1天, round1→1天, round2→2天, round3→4天, round4→7天, round5→15天, round6+→30天
+-- ============================
+
+UPDATE t_plant SET
+  is_withered = 0,
+  is_deleted = 0,
+  next_review_date = CASE review_round
+    WHEN 0 THEN CURDATE()
+    WHEN 1 THEN DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+    WHEN 2 THEN DATE_ADD(CURDATE(), INTERVAL 2 DAY)
+    WHEN 3 THEN DATE_ADD(CURDATE(), INTERVAL 4 DAY)
+    WHEN 4 THEN DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+    WHEN 5 THEN DATE_ADD(CURDATE(), INTERVAL 15 DAY)
+    ELSE DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+  END,
+  last_review_date = CASE
+    WHEN review_round = 0 THEN NULL
+    ELSE CURDATE()
+  END,
+  update_time = NOW()
+WHERE user_id = 3;
+
+UPDATE t_user SET
+  current_streak = 5,
+  max_streak = GREATEST(max_streak, 5),
+  last_check_in = CURDATE(),
+  update_time = NOW()
+WHERE id = 3;
+
+-- 刷新复习记录日期（使统计页面趋势图有数据）
+-- 将所有复习记录日期从 2026-05-20 基准平移到当前日期
+UPDATE t_review_record SET
+  scheduled_date = CASE WHEN scheduled_date IS NOT NULL THEN DATE_ADD(scheduled_date, INTERVAL DATEDIFF(CURDATE(), '2026-05-20') DAY) ELSE NULL END,
+  actual_date = DATE_ADD(actual_date, INTERVAL DATEDIFF(CURDATE(), '2026-05-20') DAY),
+  create_time = DATE_ADD(create_time, INTERVAL DATEDIFF(CURDATE(), '2026-05-20') DAY)
+WHERE user_id = 3;
 
 SET FOREIGN_KEY_CHECKS = 1;

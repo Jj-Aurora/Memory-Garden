@@ -60,11 +60,11 @@ class StudyPackIntegrationTest {
     }
 
     @Test
-    @DisplayName("浏览知识包列表-初始数据3个")
+    @DisplayName("浏览知识包列表-初始数据10个")
     void testListStudyPacks() {
         List<StudyPack> packs = studyPackMapper.selectAll();
         assertNotNull(packs);
-        assertEquals(3, packs.size());
+        assertEquals(10, packs.size());
     }
 
     @Test

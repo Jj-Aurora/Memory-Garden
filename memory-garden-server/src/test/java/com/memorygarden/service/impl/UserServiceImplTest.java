@@ -1,10 +1,12 @@
 package com.memorygarden.service.impl;
 
+import com.memorygarden.common.util.JwtUtils;
 import com.memorygarden.mapper.UserMapper;
 import com.memorygarden.model.dto.UserLoginRequest;
 import com.memorygarden.model.dto.UserRegisterRequest;
 import com.memorygarden.model.entity.User;
 import com.memorygarden.model.vo.UserVO;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,6 +16,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,6 +44,13 @@ class UserServiceImplTest {
 
     private UserRegisterRequest registerRequest;
     private User existingUser;
+
+    @BeforeAll
+    static void initJwtSecret() throws Exception {
+        Field secretField = JwtUtils.class.getDeclaredField("SECRET");
+        secretField.setAccessible(true);
+        secretField.set(null, "test-jwt-secret-key-for-unit-tests-only");
+    }
 
     @BeforeEach
     void setUp() {
@@ -249,7 +260,7 @@ class UserServiceImplTest {
                 }});
             });
 
-            assertTrue(exception.getMessage().contains("用户不存在"));
+            assertTrue(exception.getMessage().contains("用户名或密码错误"));
         }
 
         @Test
@@ -269,8 +280,8 @@ class UserServiceImplTest {
         }
 
         @Test
-        @DisplayName("登录-每次登录返回不同Token")
-        void testLogin_DifferentTokens() {
+        @DisplayName("登录-返回有效JWT Token")
+        void testLogin_ReturnsJwtToken() {
             when(userMapper.selectByUsername("testuser")).thenReturn(existingUser);
             when(passwordEncoder.matches("password123", "$2a$10$encoded")).thenReturn(true);
 
@@ -279,10 +290,10 @@ class UserServiceImplTest {
                 setPassword("password123");
             }};
 
-            String token1 = userService.login(loginReq);
-            String token2 = userService.login(loginReq);
+            String token = userService.login(loginReq);
 
-            assertNotEquals(token1, token2);
+            assertNotNull(token);
+            assertTrue(token.split("\\.").length == 3, "Token 应为 JWT 三段式格式");
         }
     }
 

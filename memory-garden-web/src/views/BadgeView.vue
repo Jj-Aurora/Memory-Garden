@@ -1,6 +1,7 @@
 <template>
   <div class="badge-view">
-    <h2>成就徽章</h2>
+    <h2 class="section-title">成就徽章</h2>
+    <p class="view-subtitle">记录你的每一个里程碑</p>
 
     <div class="badge-tabs">
       <el-radio-group v-model="activeTab" @change="loadBadges">
@@ -47,19 +48,22 @@ onMounted(loadBadges)
 
 <style scoped lang="scss">
 .badge-view {
-  h2 {
-    margin: 0 0 20px;
-    color: #303133;
-  }
+  max-width: 700px;
+}
+
+.view-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: calc(var(--space-xs) * -1) 0 var(--space-xl);
 }
 
 .badge-tabs {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-xl);
 }
 
 .badge-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-sm);
 }
 </style>

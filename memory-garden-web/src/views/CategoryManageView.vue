@@ -1,17 +1,18 @@
 <template>
   <div class="category-manage-view">
-    <!-- 页面头部 -->
     <div class="page-header">
-      <div class="header-info">
-        <h2>分类管理</h2>
+      <div>
+        <h2 class="section-title">分类管理</h2>
         <p class="header-desc">整理知识领域，让花园井然有序</p>
       </div>
-      <el-button type="primary" class="add-btn" @click="showAddDialog">
-        <el-icon><Plus /></el-icon> 新增分类
+      <el-button type="primary" size="large" @click="showAddDialog">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        新增分类
       </el-button>
     </div>
 
-    <!-- 统计概览 -->
     <div class="stats-bar">
       <div class="stat-item">
         <span class="stat-value">{{ categories.length }}</span>
@@ -23,7 +24,6 @@
       </div>
     </div>
 
-    <!-- 分类卡片列表 -->
     <div v-loading="loading" class="category-grid">
       <div v-for="(cat, index) in categories" :key="cat.id" class="category-card">
         <div class="card-icon" :style="{ background: getCardColor(index) }">
@@ -47,13 +47,11 @@
         </div>
       </div>
 
-      <!-- 空状态 -->
       <el-empty v-if="categories.length === 0 && !loading" description="还没有分类，点击右上角创建第一个吧" />
     </div>
 
-    <!-- 新增/编辑对话框 -->
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑分类' : '新增分类'" width="420px"
-      :close-on-click-modal="false" class="category-dialog">
+      :close-on-click-modal="false">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="72px" label-position="left">
         <el-form-item label="名称" prop="name">
           <el-input v-model="form.name" placeholder="输入分类名称" maxlength="20" show-word-limit />
@@ -186,34 +184,30 @@ onMounted(loadCategories)
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: var(--space-xl);
+    gap: var(--space-base);
+  }
 
-    h2 {
-      margin: 0;
-      color: #303133;
-      font-size: 22px;
-    }
+  .header-desc {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin: var(--space-xs) 0 0;
+  }
 
-    .header-desc {
-      margin: 4px 0 0;
-      font-size: 14px;
-      color: #909399;
-    }
-
-    .add-btn {
-      border-radius: 8px;
-      font-weight: 500;
-    }
+  .btn-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
   }
 
   .stats-bar {
     display: flex;
-    gap: 24px;
-    margin-bottom: 24px;
-    padding: 16px 20px;
-    background: #f6ffed;
-    border-radius: 10px;
-    border: 1px solid #e8f5e9;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-xl);
+    padding: var(--space-base) var(--space-xl);
+    background: var(--color-primary-bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-light);
 
     .stat-item {
       display: flex;
@@ -222,16 +216,16 @@ onMounted(loadCategories)
       min-width: 80px;
 
       .stat-value {
-        font-size: 24px;
-        font-weight: 700;
-        color: #2d8c3c;
-        line-height: 1.2;
+        font-size: var(--font-size-2xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-primary);
+        line-height: var(--line-height-tight);
       }
 
       .stat-label {
-        font-size: 12px;
-        color: #909399;
-        margin-top: 2px;
+        font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
+        margin-top: var(--space-xs);
       }
     }
   }
@@ -239,23 +233,23 @@ onMounted(loadCategories)
   .category-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 14px;
+    gap: var(--space-base);
     min-height: 120px;
   }
 
   .category-card {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 16px;
-    background: #fff;
-    border: 1px solid #ebeef5;
-    border-radius: 12px;
-    transition: all 0.25s ease;
+    gap: var(--space-base);
+    padding: var(--space-base);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-normal);
 
     &:hover {
-      border-color: #c2e7b0;
-      box-shadow: 0 4px 12px rgba(45, 140, 60, 0.08);
+      border-color: var(--color-primary-lighter);
+      box-shadow: var(--shadow-primary);
       transform: translateY(-1px);
     }
 
@@ -263,15 +257,15 @@ onMounted(loadCategories)
       flex-shrink: 0;
       width: 44px;
       height: 44px;
-      border-radius: 10px;
+      border-radius: var(--radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
 
       .icon-text {
         color: #fff;
-        font-size: 18px;
-        font-weight: 600;
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-bold);
       }
     }
 
@@ -281,17 +275,17 @@ onMounted(loadCategories)
 
       .card-name {
         margin: 0;
-        font-size: 15px;
-        font-weight: 600;
-        color: #303133;
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-primary);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
 
       .card-meta {
-        font-size: 12px;
-        color: #b0b3b8;
+        font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
         margin-top: 2px;
         display: inline-block;
       }
@@ -302,12 +296,22 @@ onMounted(loadCategories)
       display: flex;
       gap: 2px;
       opacity: 0;
-      transition: opacity 0.2s;
+      transition: opacity var(--transition-fast);
     }
 
     &:hover .card-actions {
       opacity: 1;
     }
+  }
+}
+
+@media (max-width: 768px) {
+  .category-manage-view .page-header {
+    flex-direction: column;
+  }
+
+  .category-manage-view .category-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

@@ -3,6 +3,7 @@ package com.memorygarden.interceptor;
 import com.memorygarden.common.constant.Constant;
 import com.memorygarden.common.exception.BusinessException;
 import com.memorygarden.common.result.ResultCode;
+import com.memorygarden.common.util.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -65,22 +66,12 @@ public class AuthInterceptor implements HandlerInterceptor {
     /**
      * 从 Token 中解析用户 ID
      *
-     * <p>当前 MVP 阶段 Token 格式为 userId:randomUUID，
-     * 后续可替换为 JWT 解析。</p>
+     * <p>使用 JWT 签名验证，确保 Token 未被篡改且未过期。</p>
      *
      * @param token 登录 Token
-     * @return 用户 ID，解析失败返回 null
+     * @return 用户 ID，验证失败返回 null
      */
     private Long parseUserIdFromToken(String token) {
-        try {
-            int separatorIndex = token.indexOf(':');
-            if (separatorIndex > 0) {
-                return Long.parseLong(token.substring(0, separatorIndex));
-            }
-            return null;
-        } catch (NumberFormatException e) {
-            log.warn("Token 解析失败: {}", token);
-            return null;
-        }
+        return JwtUtils.verifyAndGetUserId(token);
     }
 }

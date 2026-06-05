@@ -12,6 +12,7 @@ import com.memorygarden.model.entity.User;
 import com.memorygarden.model.enums.SelfEvaluation;
 import com.memorygarden.model.vo.ReviewSummaryVO;
 import com.memorygarden.model.vo.ReviewVO;
+import com.memorygarden.service.BadgeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -52,6 +53,9 @@ class ReviewServiceImplTest {
 
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private BadgeService badgeService;
 
     @InjectMocks
     private ReviewServiceImpl reviewService;

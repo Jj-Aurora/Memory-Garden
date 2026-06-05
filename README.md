@@ -1,26 +1,36 @@
 # 记忆花园 (Memory Garden)
 
-基于艾宾浩斯遗忘曲线的游戏化学习复习系统。每学习一条新知识，就在虚拟花园中种下一颗种子；通过持续复习，植物从种子逐步生长到结果，直观反映知识掌握程度。
+基于艾宾浩斯遗忘曲线的游戏化间隔重复学习系统。每学习一条新知识，就在虚拟花园中种下一颗种子；通过持续复习，植物从种子逐步生长到结果，直观反映知识掌握程度。
 
 ---
 
 ## 目录
 
-- [功能特性](#功能特性)
+- [项目简介](#项目简介)
+- [核心特性](#核心特性)
 - [技术架构](#技术架构)
 - [项目结构](#项目结构)
-- [环境要求](#环境要求)
-- [安装部署](#安装部署)
-- [使用指南](#使用指南)
+- [安装指南](#安装指南)
+- [使用方法](#使用方法)
+- [构建方法](#构建方法)
 - [API 接口说明](#api-接口说明)
 - [数据库设计](#数据库设计)
 - [核心算法](#核心算法)
 - [常见问题](#常见问题)
-- [维护注意事项](#维护注意事项)
 
 ---
 
-## 功能特性
+## 项目简介
+
+**记忆花园** 是一个将间隔重复学习法与虚拟花园养成相结合的 Web 应用。用户创建知识卡片后，系统自动生成对应的虚拟植物；按照艾宾浩斯遗忘曲线规划复习时间，每次复习推动植物生长——从种子、发芽、成长、开花到结果。遗忘则导致植物枯萎，复习可使其复活。
+
+系统采用前后端分离架构：
+- **后端**：Spring Boot 2.7 + MyBatis + MySQL 8.0 + JWT 认证
+- **前端**：Vue 3 + TypeScript + Vite + Element Plus + ECharts
+
+---
+
+## 核心特性
 
 ### 知识管理
 - **知识卡片**：手动创建正面（问题）/ 背面（答案）格式的知识卡片
@@ -107,12 +117,9 @@ Memory Garden/
 │   │   ├── common/                      # 通用组件
 │   │   │   ├── constant/                # 常量定义
 │   │   │   ├── exception/               # 异常处理
-│   │   │   └── result/                  # 统一返回结构
+│   │   │   ├── result/                  # 统一返回结构
+│   │   │   └── util/                    # JWT 工具类
 │   │   ├── config/                      # 配置类
-│   │   │   ├── CorsConfig               # 跨域配置
-│   │   │   ├── SecurityConfig           # 安全配置
-│   │   │   ├── SwaggerConfig            # API 文档配置
-│   │   │   └── WebMvcConfig             # 拦截器注册
 │   │   ├── controller/                  # 控制器（8 个模块）
 │   │   ├── interceptor/                 # 认证拦截器
 │   │   ├── mapper/                      # MyBatis Mapper
@@ -127,52 +134,48 @@ Memory Garden/
 │   │   ├── db/memory_garden.sql         # 数据库初始化脚本
 │   │   ├── mapper/*.xml                 # MyBatis XML 映射
 │   │   ├── application.yml              # 主配置
-│   │   └── application-dev.yml          # 开发环境配置
+│   │   ├── application-dev.yml          # 开发环境配置
+│   │   └── application-prod.yml         # 生产环境配置
 │   └── pom.xml
 │
 ├── memory-garden-web/                   # 前端应用
 │   ├── src/
 │   │   ├── api/                         # API 请求模块
-│   │   │   ├── request.ts               # Axios 封装（拦截器）
-│   │   │   ├── user.ts                  # 用户接口
-│   │   │   ├── card.ts                  # 卡片接口
-│   │   │   ├── category.ts              # 分类接口
-│   │   │   ├── garden.ts                # 花园接口
-│   │   │   ├── review.ts                # 复习接口
-│   │   │   ├── badge.ts                 # 徽章接口
-│   │   │   ├── stats.ts                 # 统计接口
-│   │   │   └── studyPack.ts             # 知识包接口
 │   │   ├── assets/
 │   │   │   ├── images/plants/           # 植物 SVG 图标（6 个阶段）
-│   │   │   └── styles/global.scss       # 全局样式
+│   │   │   └── styles/global.scss       # 全局样式 + 设计系统
 │   │   ├── components/                  # 公共组件
-│   │   │   ├── MainLayout.vue           # 主布局
-│   │   │   ├── Navbar.vue               # 导航栏
-│   │   │   ├── PlantCard.vue            # 植物卡片
-│   │   │   ├── PlantStageIcon.vue       # 阶段图标
-│   │   │   ├── ReviewCard.vue           # 复习卡片
-│   │   │   ├── BadgeItem.vue            # 徽章项
-│   │   │   ├── CategoryTag.vue          # 分类标签
-│   │   │   ├── StatsChart.vue           # 统计图表
-│   │   │   └── StreakCalendar.vue       # 打卡日历
 │   │   ├── router/index.ts              # 路由配置 + 守卫
 │   │   ├── stores/                      # Pinia 状态管理
-│   │   │   ├── user.ts                  # 用户状态
-│   │   │   ├── garden.ts                # 花园状态
-│   │   │   └── review.ts                # 复习状态
 │   │   ├── views/                       # 页面视图（13 个）
 │   │   ├── App.vue
 │   │   └── main.ts
 │   ├── vite.config.ts                   # Vite 配置（含代理）
 │   └── package.json
 │
-├── specs/spec.md                        # 产品需求规格说明书
-└── AGENTS.md                            # 代码规范
+├── deploy/                             # 部署包（完整部署资源）
+│   ├── backend/                        # 后端可执行 JAR
+│   ├── frontend/                       # 前端静态资源
+│   ├── sql/                            # 数据库初始化脚本
+│   ├── config/                         # 生产环境配置 + Nginx 模板
+│   ├── docker/                         # Docker 部署文件
+│   │   ├── Dockerfile                  # 多阶段构建镜像
+│   │   ├── docker-compose.yml          # 容器编排（含 MySQL）
+│   │   └── .dockerignore
+│   ├── scripts/                        # 构建脚本
+│   │   ├── build.sh                    # Linux/macOS
+│   │   └── build.ps1                   # Windows
+│   ├── start.sh                        # 启动脚本 (Linux/macOS)
+│   ├── start.bat                       # 启动脚本 (Windows)
+│   └── .env.example                    # 环境变量模板
+└── AGENTS.md                           # 代码规范
 ```
 
 ---
 
-## 环境要求
+## 安装指南
+
+### 环境要求
 
 | 依赖 | 最低版本 | 说明 |
 |------|---------|------|
@@ -181,101 +184,230 @@ Memory Garden/
 | Node.js | 16+ | 前端运行环境 |
 | npm | 8+ | 前端包管理 |
 | MySQL | 8.0+ | 数据库 |
+| Docker | 20.10+ | 容器化部署（可选） |
+| Docker Compose | 2.0+ | 容器编排（可选） |
 
----
-
-## 安装部署
-
-### 1. 数据库初始化
+### 方式一：Docker Compose 部署（推荐）
 
 ```bash
-# 登录 MySQL
-mysql -u root -p
+# 1. 克隆项目
+git clone <repository-url>
+cd Memory\ Garden
 
-# 创建数据库
-CREATE DATABASE memory_garden DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+# 2. 创建环境变量文件
+cp deploy/.env.example deploy/.env
+# 编辑 deploy/.env，填入真实的 JWT_SECRET 和 DB_PASSWORD
 
-# 导入初始化脚本（含表结构和基础数据：徽章、知识包）
-mysql -u root -p memory_garden < memory-garden-server/src/main/resources/db/memory_garden.sql
+# 3. 一键启动
+cd deploy/docker
+docker compose --env-file ../.env up -d
+
+# 4. 查看日志
+docker compose logs -f app
 ```
 
-### 2. 后端启动
+启动后访问：
+- 前端页面：`http://localhost:8080`
+- API 文档：`http://localhost:8080/doc.html`（需设置 `SWAGGER_ENABLE=true`）
+
+### 方式二：手动部署
+
+#### 1. 数据库初始化
+
+```bash
+mysql -u root -p
+
+CREATE DATABASE memory_garden DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE memory_garden;
+SOURCE memory-garden-server/src/main/resources/db/memory_garden.sql;
+```
+
+#### 2. 后端启动
 
 ```bash
 cd memory-garden-server
 
-# 修改数据库连接配置（如需）
-# 编辑 src/main/resources/application-dev.yml
-# spring.datasource.url / username / password
+# 设置环境变量（必须）
+export JWT_SECRET="your-strong-random-secret-at-least-32-chars"
+export DB_PASSWORD="your_db_password"
+export DB_URL="jdbc:mysql://localhost:3306/memory_garden?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+export DB_USERNAME="root"
 
 # 构建并启动
 mvn clean package -DskipTests
-java -jar target/memory-garden-server-1.0.0.jar
-
-# 或开发模式启动
-mvn spring-boot:run
+java -Dspring.profiles.active=prod -jar target/memory-garden-server-1.0.0.jar
 ```
 
 后端默认运行在 `http://localhost:8080`。
 
-### 3. 前端启动
+#### 3. 前端部署
 
 ```bash
 cd memory-garden-web
+npm ci
+npx vite build
+# 产物输出到 dist/ 目录，部署到 Nginx 等 Web 服务器
+```
 
-# 安装依赖
+Nginx 配置示例：
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    # 前端静态文件
+    location / {
+        root /usr/share/nginx/html;
+        index index.html;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # API 反向代理到后端
+    location /api/ {
+        proxy_pass http://127.0.0.1:8080/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+#### 4. 开发模式
+
+```bash
+# 后端
+cd memory-garden-server
+mvn spring-boot:run
+
+# 前端（自动代理 /api 到后端 8080）
+cd memory-garden-web
 npm install
-
-# 开发模式启动（自动代理 /api 到后端 8080）
 npm run dev
 ```
 
-前端默认运行在 `http://localhost:5173`，Vite 开发服务器自动将 `/api` 请求代理到后端。
-
-### 4. 生产构建
-
-```bash
-# 前端构建
-cd memory-garden-web
-npm run build
-# 产物输出到 dist/ 目录，可部署到 Nginx 等 Web 服务器
-
-# 后端构建
-cd memory-garden-server
-mvn clean package -DskipTests
-# 产物为 target/memory-garden-server-1.0.0.jar
-```
-
-### 5. API 文档
-
-启动后端后访问 Knife4j 文档：`http://localhost:8080/doc.html`
+前端开发服务器运行在 `http://localhost:5173`。
 
 ---
 
-## 使用指南
+## 使用方法
 
-### 注册与登录
+### 命令行参数与脚本
+
+#### 构建脚本
+
+```bash
+# Linux/macOS
+deploy/scripts/build.sh          # 完整构建（清理 + 前端 + 后端 + 打包到 deploy/）
+
+# Windows PowerShell
+deploy\scripts\build.ps1         # 完整构建
+```
+
+构建产物输出到 `deploy/` 目录：
+
+```
+deploy/
+├── backend/
+│   └── memory-garden-server-1.0.0.jar   # 后端可执行 JAR
+├── frontend/                             # 前端静态资源
+├── sql/memory_garden.sql                 # 数据库初始化脚本
+├── config/                               # 生产配置 + Nginx 模板
+├── .env.example                          # 环境变量模板
+├── start.sh / start.bat                  # 启动脚本
+└── docker/                               # Docker 部署文件
+```
+
+#### 环境变量
+
+| 变量名 | 必需 | 默认值 | 说明 |
+|--------|------|--------|------|
+| `JWT_SECRET` | 是 | 无 | JWT 签名密钥，至少 32 字符强随机字符串 |
+| `DB_PASSWORD` | 是 | 无 | MySQL 数据库密码 |
+| `DB_URL` | 否 | `jdbc:mysql://localhost:3306/memory_garden?...` | 数据库连接 URL |
+| `DB_USERNAME` | 否 | `root` | 数据库用户名 |
+| `SERVER_PORT` | 否 | `8080` | 后端服务端口 |
+| `SWAGGER_ENABLE` | 否 | `false` | 是否启用 Swagger API 文档 |
+
+#### JAR 运行参数
+
+```bash
+# 基本启动
+java -jar memory-garden-server-1.0.0.jar
+
+# 指定生产环境配置
+java -Dspring.profiles.active=prod -jar memory-garden-server-1.0.0.jar
+
+# 通过 JVM 参数注入环境变量
+java -DJWT_SECRET="your-secret" -DDB_PASSWORD="your-password" \
+     -Dspring.profiles.active=prod \
+     -jar memory-garden-server-1.0.0.jar
+
+# 指定外部配置文件
+java -Dspring.config.additional-location=file:/app/config/ \
+     -Dspring.profiles.active=prod \
+     -jar memory-garden-server-1.0.0.jar
+
+# 自定义端口
+java -Dserver.port=9090 -jar memory-garden-server-1.0.0.jar
+
+# 调整 JVM 内存
+java -Xms256m -Xmx512m -jar memory-garden-server-1.0.0.jar
+```
+
+#### Docker 命令
+
+```bash
+# 构建镜像（从项目根目录执行）
+docker build -t memory-garden:latest -f deploy/docker/Dockerfile .
+
+# 运行容器（连接外部 MySQL）
+docker run -d \
+    --name memory-garden \
+    -p 8080:8080 \
+    -e JWT_SECRET="your-strong-random-secret" \
+    -e DB_PASSWORD="your_db_password" \
+    -e DB_URL="jdbc:mysql://host.docker.internal:3306/memory_garden?..." \
+    memory-garden:latest
+
+# Docker Compose 启动（含 MySQL）
+cd deploy/docker
+docker compose --env-file ../.env up -d
+
+# 查看日志
+docker compose logs -f app
+
+# 停止服务
+docker compose down
+
+# 停止并清除数据卷
+docker compose down -v
+```
+
+### 用户操作指南
+
+#### 注册与登录
 
 1. 访问系统，进入注册页面
 2. 填写用户名、密码、昵称完成注册
 3. 使用用户名和密码登录，获取 Token
 4. Token 自动存储在 localStorage，后续请求自动携带
 
-### 创建知识卡片
+#### 创建知识卡片
 
 1. 点击导航栏「新建知识」
 2. 填写正面内容（问题）和背面内容（答案）
 3. 选择分类（可选）
 4. 提交后花园中自动生成一颗种子
 
-### 导入预设知识包
+#### 导入预设知识包
 
 1. 进入「知识库」页面
 2. 浏览可用知识包列表
 3. 点击「导入」一键批量生成卡片和种子
 4. 同一知识包不可重复导入
 
-### 复习流程
+#### 复习流程
 
 1. 登录后首页展示花园，导航栏显示待复习数量
 2. 点击「开始复习」进入复习页面
@@ -285,17 +417,77 @@ mvn clean package -DskipTests
    - **忘记了**：回退一个生长阶段
 4. 完成所有待复习后展示总结页
 
-### 花园管理
+#### 花园管理
 
 - 首页默认展示花园全景
 - 按分类、阶段、枯萎状态筛选植物
 - 按创建时间、复习时间、生长阶段排序
 - 枯萎植物有专属列表和标识
 
-### 查看成就与统计
+#### 查看成就与统计
 
 - 「徽章」页面查看所有徽章及获得状态
 - 「统计」页面查看今日数据、趋势图、阶段分布、连续打卡
+
+---
+
+## 构建方法
+
+### 从源码构建
+
+#### 前置条件
+
+- JDK 1.8+
+- Maven 3.6+
+- Node.js 16+
+- npm 8+
+
+#### 一键构建
+
+```bash
+# Linux/macOS
+deploy/scripts/build.sh
+
+# Windows
+deploy\scripts\build.ps1
+```
+
+产物输出到 `deploy/` 目录。
+
+#### 分步构建
+
+```bash
+# 1. 前端构建
+cd memory-garden-web
+npm ci
+npx vite build    # 产物: memory-garden-web/dist/
+
+# 2. 后端构建
+cd memory-garden-server
+mvn clean package -DskipTests    # 产物: target/memory-garden-server-1.0.0.jar
+```
+
+### Docker 镜像构建
+
+```bash
+# 构建镜像（从项目根目录执行，指定 Dockerfile 路径）
+docker build -t memory-garden:latest -f deploy/docker/Dockerfile .
+
+# 查看镜像大小
+docker images memory-garden
+
+# 推送到镜像仓库
+docker tag memory-garden:latest your-registry/memory-garden:latest
+docker push your-registry/memory-garden:latest
+```
+
+Docker 镜像特性：
+- **多阶段构建**：前端 Node.js 构建 → 后端 Maven 构建 → 仅 JRE 运行时
+- **非 root 用户**：应用以 `appuser` 用户运行
+- **无源码泄露**：最终镜像不含任何源代码或构建工具
+- **依赖缓存**：前端/后端依赖层分离，仅依赖变化时重新安装
+- **健康检查**：内置 Docker HEALTHCHECK
+- **配置外置**：支持通过环境变量和外部配置文件覆盖
 
 ---
 
@@ -305,7 +497,7 @@ mvn clean package -DskipTests
 
 **Base URL**: `/api`
 
-**认证方式**: 请求头 `Authorization: {token}`（登录接口返回的 Token）
+**认证方式**: 请求头 `Authorization: {token}`（登录接口返回的 JWT Token）
 
 **统一返回结构**:
 
@@ -358,7 +550,7 @@ mvn clean package -DskipTests
 }
 ```
 
-**登录返回**: `data` 为 Token 字符串，格式 `{userId}:{uuid}`
+**登录返回**: `data` 为 JWT Token 字符串
 
 **修改个人信息请求体**:
 ```json
@@ -379,15 +571,6 @@ mvn clean package -DskipTests
 | PUT | `/{id}` | 修改分类 | 是 |
 | DELETE | `/{id}` | 删除分类（软删除） | 是 |
 
-**分类创建/修改请求体**:
-```json
-{
-  "name": "string",
-  "icon": "string",
-  "sortOrder": 0
-}
-```
-
 ---
 
 ### 知识卡片模块 `/api/card`
@@ -398,27 +581,7 @@ mvn clean package -DskipTests
 | GET | `/{id}` | 获取卡片详情 | 是 |
 | GET | `/list` | 获取卡片列表 | 是 |
 | PUT | `/{id}` | 修改知识卡片 | 是 |
-| DELETE | `/{id}` | 删除知识卡片（软删除，同步删除关联植物） | 是 |
-
-**卡片创建请求体**:
-```json
-{
-  "frontContent": "string",
-  "backContent": "string",
-  "categoryId": 0,
-  "note": "string"
-}
-```
-
-**卡片修改请求体**:
-```json
-{
-  "frontContent": "string",
-  "backContent": "string",
-  "categoryId": 0,
-  "note": "string"
-}
-```
+| DELETE | `/{id}` | 删除知识卡片（软删除） | 是 |
 
 **列表查询参数**: `categoryId`（可选，按分类筛选）
 
@@ -436,16 +599,6 @@ mvn clean package -DskipTests
 **筛选参数**: `categoryId`（可选）、`stage`（可选，1-5）、`withered`（可选，布尔）
 
 **排序参数**: `sortBy`（createTime / nextReviewDate / growthStage）、`order`（asc / desc）
-
-**花园视图返回数据**:
-```json
-{
-  "totalCount": 25,
-  "witheredCount": 2,
-  "stageCount": {"1": 4, "2": 8, "3": 7, "4": 4, "5": 2},
-  "plants": [...]
-}
-```
 
 ---
 
@@ -467,17 +620,7 @@ mvn clean package -DskipTests
 }
 ```
 
-`evaluation` 取值: `REMEMBERED`（记住了）/ `VAGUE`（模糊）/ `FORGOTTEN`（忘记了）
-
-**复习总结返回数据**:
-```json
-{
-  "totalCount": 16,
-  "rememberedCount": 12,
-  "vagueCount": 2,
-  "forgottenCount": 2
-}
-```
+`evaluation` 取值: `REMEMBERED` / `VAGUE` / `FORGOTTEN`
 
 ---
 
@@ -501,21 +644,6 @@ mvn clean package -DskipTests
 
 **趋势参数**: `days`（默认 7）
 
-**今日数据返回**:
-```json
-{
-  "todayNewCards": 0,
-  "todayReviewCount": 16,
-  "todayDegradedCount": 2,
-  "currentStreak": 15,
-  "maxStreak": 15,
-  "totalCardCount": 25,
-  "totalPlantCount": 25,
-  "stageDistribution": {"1": 4, "2": 8, "3": 7, "4": 4, "5": 2},
-  "trendData": {"2026-05-14": 5, "2026-05-15": 8, ...}
-}
-```
-
 ---
 
 ### 预设知识包模块 `/api/study-pack`
@@ -526,8 +654,6 @@ mvn clean package -DskipTests
 | GET | `/{id}` | 获取知识包详情 | 否 |
 | GET | `/{id}/items` | 获取知识包条目列表 | 否 |
 | POST | `/{id}/import` | 导入知识包到个人花园 | 是 |
-
-**导入返回**: `data` 为导入的卡片数量（整数）
 
 ---
 
@@ -609,9 +735,11 @@ Token 过期或未携带。检查 localStorage 中的 token 是否存在，请�
 
 同一知识包对同一用户只能导入一次。如需重新导入，需在数据库 `t_study_pack_import` 表中删除对应记录。
 
-### Q: 植物状态与预期不符
+### Q: Docker 容器启动失败
 
-复习自评会实时更新植物状态。可通过统计接口 `/api/stats/today` 查看今日退化次数，通过花园接口 `/api/garden` 查看当前阶段分布。
+1. 检查 `deploy/.env` 文件是否已创建并填入必需的环境变量（`JWT_SECRET`、`DB_PASSWORD`）
+2. 检查 MySQL 容器是否健康：`docker compose ps`
+3. 查看应用日志：`docker compose logs app`
 
 ### Q: 前端代理 404
 
@@ -619,37 +747,6 @@ Token 过期或未携带。检查 localStorage 中的 token 是否存在，请�
 
 ### Q: 数据库连接失败
 
-检查 `application-dev.yml` 中的数据库地址、用户名、密码是否正确，MySQL 服务是否启动，数据库 `memory_garden` 是否已创建。
-
----
-
-## 维护注意事项
-
-### 数据安全
-
-- **禁止物理删除**：所有删除操作均为软删除（`is_deleted=1`），不可执行 `DELETE FROM` 语句
-- **数据隔离**：运维操作必须带 `user_id` 条件，避免影响其他用户
-- **变更前备份**：修改生产数据前务必使用 `mysqldump` 备份相关表
-
-### 定时任务
-
-- `WitherCheckTask` 定期扫描枯萎植物，确保 Spring `@Scheduled` 正常运行
-- 如需暂停枯萎检查，可在配置中禁用或注释 `@Scheduled` 注解
-
-### 日志
-
-- 开发环境日志级别为 `debug`（`application-dev.yml` 中配置）
-- 生产环境建议调整为 `info` 或 `warn`
-- MyBatis SQL 日志默认输出到控制台，生产环境应关闭（移除 `log-impl` 配置）
-
-### 性能
-
-- 所有查询均基于 `user_id` 索引，单用户数据量在千级别内无性能问题
-- 如数据量增长，关注 `t_review_record` 表的清理策略（软删除历史记录）
-- 花园视图接口会查询用户所有植物，超大数据量时考虑分页
-
-### 扩展方向
-
-- 复习算法模块化设计，可替换为更复杂的间隔重复算法（如 SM-2）
-- 植物外观系统预留多皮肤接口，当前为统一 SVG 图标
-- 知识卡片字段设计预留扩展空间（note 字段等）
+1. 确认 MySQL 服务已启动
+2. 确认 `DB_URL`、`DB_USERNAME`、`DB_PASSWORD` 环境变量正确
+3. Docker 环境中数据库主机名使用 `mysql`（容器名），而非 `localhost`

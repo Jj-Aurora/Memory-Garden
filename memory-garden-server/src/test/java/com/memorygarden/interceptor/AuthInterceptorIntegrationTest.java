@@ -3,6 +3,8 @@ package com.memorygarden.interceptor;
 import com.memorygarden.common.constant.Constant;
 import com.memorygarden.common.exception.BusinessException;
 import com.memorygarden.common.result.ResultCode;
+import com.memorygarden.common.util.JwtUtils;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,6 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+
+import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,6 +35,13 @@ class AuthInterceptorIntegrationTest {
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
 
+    @BeforeAll
+    static void initJwtSecret() throws Exception {
+        Field secretField = JwtUtils.class.getDeclaredField("SECRET");
+        secretField.setAccessible(true);
+        secretField.set(null, "test-jwt-secret-key-for-unit-tests-only");
+    }
+
     @BeforeEach
     void setUp() {
         request = new MockHttpServletRequest();
@@ -42,20 +53,10 @@ class AuthInterceptorIntegrationTest {
     class TokenFormatTests {
 
         @Test
-        @DisplayName("Token-多个冒号分隔符-取第一段作为userId")
-        void testPreHandle_MultipleColons() throws Exception {
-            request.addHeader(Constant.AUTHORIZATION_HEADER, "123:abc:def:ghi");
-
-            boolean result = authInterceptor.preHandle(request, response, null);
-
-            assertTrue(result);
-            assertEquals(123L, request.getAttribute(AuthInterceptor.CURRENT_USER_ID));
-        }
-
-        @Test
         @DisplayName("Token-userId为0-合法解析")
         void testPreHandle_ZeroUserId() throws Exception {
-            request.addHeader(Constant.AUTHORIZATION_HEADER, "0:abc123");
+            String token = JwtUtils.generateToken(0L);
+            request.addHeader(Constant.AUTHORIZATION_HEADER, token);
 
             boolean result = authInterceptor.preHandle(request, response, null);
 
@@ -66,7 +67,8 @@ class AuthInterceptorIntegrationTest {
         @Test
         @DisplayName("Token-大数字userId-合法解析")
         void testPreHandle_LargeUserId() throws Exception {
-            request.addHeader(Constant.AUTHORIZATION_HEADER, "9999999999:abc123");
+            String token = JwtUtils.generateToken(9999999999L);
+            request.addHeader(Constant.AUTHORIZATION_HEADER, token);
 
             boolean result = authInterceptor.preHandle(request, response, null);
 
@@ -75,33 +77,20 @@ class AuthInterceptorIntegrationTest {
         }
 
         @Test
-        @DisplayName("Token-负数userId-合法解析（业务层校验）")
-        void testPreHandle_NegativeUserId() throws Exception {
-            request.addHeader(Constant.AUTHORIZATION_HEADER, "-1:abc123");
+        @DisplayName("Token-伪造Token-解析失败")
+        void testPreHandle_ForgedToken() {
+            request.addHeader(Constant.AUTHORIZATION_HEADER, "eyJhbGciOiJIUzI1NiJ9.fakepayload.fakesignature");
 
-            boolean result = authInterceptor.preHandle(request, response, null);
-
-            assertTrue(result);
-            assertEquals(-1L, request.getAttribute(AuthInterceptor.CURRENT_USER_ID));
+            BusinessException ex = assertThrows(BusinessException.class, () -> {
+                authInterceptor.preHandle(request, response, null);
+            });
+            assertEquals(ResultCode.NOT_LOGIN_ERROR.getCode(), ex.getCode());
         }
 
         @Test
-        @DisplayName("Token-仅有冒号无UUID部分-仍可解析userId")
-        void testPreHandle_OnlyColon() throws Exception {
-            request.addHeader(Constant.AUTHORIZATION_HEADER, "123:");
-
-            // "123:" 中冒号位置为3，substring(0,3)="123" 是合法数字
-            // 冒号后为空字符串，但AuthInterceptor仅解析userId部分
-            boolean result = authInterceptor.preHandle(request, response, null);
-
-            assertTrue(result);
-            assertEquals(123L, request.getAttribute(AuthInterceptor.CURRENT_USER_ID));
-        }
-
-        @Test
-        @DisplayName("Token-仅有userId无冒号-解析失败")
-        void testPreHandle_OnlyUserId() {
-            request.addHeader(Constant.AUTHORIZATION_HEADER, "123");
+        @DisplayName("Token-仅数字字符串-解析失败")
+        void testPreHandle_OnlyNumbers() {
+            request.addHeader(Constant.AUTHORIZATION_HEADER, "123456");
 
             BusinessException ex = assertThrows(BusinessException.class, () -> {
                 authInterceptor.preHandle(request, response, null);
@@ -115,9 +104,10 @@ class AuthInterceptorIntegrationTest {
     class AuthHeaderFormatTests {
 
         @Test
-        @DisplayName("Authorization-空格分隔的Bearer Token")
-        void testPreHandle_BearerWithSpace() throws Exception {
-            request.addHeader(Constant.AUTHORIZATION_HEADER, "Bearer 42:token123");
+        @DisplayName("Authorization-Bearer前缀+有效JWT")
+        void testPreHandle_BearerWithJwt() throws Exception {
+            String token = JwtUtils.generateToken(42L);
+            request.addHeader(Constant.AUTHORIZATION_HEADER, Constant.TOKEN_PREFIX + token);
 
             boolean result = authInterceptor.preHandle(request, response, null);
 
@@ -126,27 +116,11 @@ class AuthInterceptorIntegrationTest {
         }
 
         @Test
-        @DisplayName("Authorization-大小写混合的bearer前缀")
+        @DisplayName("Authorization-大小写混合的bearer前缀-不被识别")
         void testPreHandle_CaseInsensitiveBearer() {
-            // 当前实现仅支持 "Bearer " 前缀，小写 "bearer" 不会被识别
-            request.addHeader(Constant.AUTHORIZATION_HEADER, "bearer 42:token123");
+            String token = JwtUtils.generateToken(42L);
+            request.addHeader(Constant.AUTHORIZATION_HEADER, "bearer " + token);
 
-            // bearer（小写）不被识别为前缀，整个字符串作为token解析
-            // "bearer 42:token123" 中 "bearer 42" 不是数字，解析失败
-            BusinessException ex = assertThrows(BusinessException.class, () -> {
-                authInterceptor.preHandle(request, response, null);
-            });
-            assertEquals(ResultCode.NOT_LOGIN_ERROR.getCode(), ex.getCode());
-        }
-
-        @Test
-        @DisplayName("Authorization-Tab字符分隔")
-        void testPreHandle_TabAsSeparator() {
-            request.addHeader(Constant.AUTHORIZATION_HEADER, "Bearer\t42:token123");
-
-            // Tab不被识别为空格分隔符，整个 "Bearer\t42:token123" 作为token
-            // 截取 "Bearer " 后为 "\t42:token123"，但startsWith("Bearer ")不匹配
-            // 所以整个字符串作为token，"Bearer\t42" 不是数字
             BusinessException ex = assertThrows(BusinessException.class, () -> {
                 authInterceptor.preHandle(request, response, null);
             });
@@ -156,8 +130,6 @@ class AuthInterceptorIntegrationTest {
         @Test
         @DisplayName("Authorization-null值-抛出未登录异常")
         void testPreHandle_NullHeader() {
-            // 不设置header
-
             BusinessException ex = assertThrows(BusinessException.class, () -> {
                 authInterceptor.preHandle(request, response, null);
             });
@@ -183,7 +155,8 @@ class AuthInterceptorIntegrationTest {
         @Test
         @DisplayName("解析成功后-attribute类型为Long")
         void testPreHandle_AttributeType() throws Exception {
-            request.addHeader(Constant.AUTHORIZATION_HEADER, "100:uuid");
+            String token = JwtUtils.generateToken(100L);
+            request.addHeader(Constant.AUTHORIZATION_HEADER, token);
 
             authInterceptor.preHandle(request, response, null);
 
@@ -195,7 +168,8 @@ class AuthInterceptorIntegrationTest {
         @Test
         @DisplayName("解析成功后-attribute key为CURRENT_USER_ID常量")
         void testPreHandle_AttributeKey() throws Exception {
-            request.addHeader(Constant.AUTHORIZATION_HEADER, "200:uuid");
+            String token = JwtUtils.generateToken(200L);
+            request.addHeader(Constant.AUTHORIZATION_HEADER, token);
 
             authInterceptor.preHandle(request, response, null);
 

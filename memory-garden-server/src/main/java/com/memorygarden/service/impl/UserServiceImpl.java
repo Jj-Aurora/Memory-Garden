@@ -2,6 +2,7 @@ package com.memorygarden.service.impl;
 
 import com.memorygarden.common.exception.BusinessException;
 import com.memorygarden.common.result.ResultCode;
+import com.memorygarden.common.util.JwtUtils;
 import com.memorygarden.mapper.UserMapper;
 import com.memorygarden.model.dto.UserLoginRequest;
 import com.memorygarden.model.dto.UserRegisterRequest;
@@ -11,8 +12,6 @@ import com.memorygarden.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 /**
  * 用户服务实现类
@@ -81,7 +80,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ResultCode.PARAMS_ERROR, "用户名或密码错误");
         }
 
-        return user.getId() + ":" + UUID.randomUUID().toString().replace("-", "");
+        return JwtUtils.generateToken(user.getId());
     }
 
     /**

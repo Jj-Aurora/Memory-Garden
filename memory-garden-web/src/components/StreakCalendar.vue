@@ -102,42 +102,40 @@ function nextMonth() {
 
 <style scoped lang="scss">
 .streak-calendar {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
+  padding: var(--space-base);
 }
 
 .calendar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-md);
 }
 
 .calendar-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #303133;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
 }
 
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 8px;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
 }
 
 .weekday {
   text-align: center;
-  font-size: 12px;
-  color: #909399;
-  font-weight: 500;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: var(--space-xs);
 }
 
 .calendar-day {
@@ -145,29 +143,31 @@ function nextMonth() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  font-size: 13px;
-  transition: all 0.2s;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
 
   &.is-empty {
     background: transparent;
   }
 
   &.is-checked {
-    background: #67c23a;
+    background: var(--color-primary);
     color: #fff;
 
     .day-number {
-      font-weight: 600;
+      font-weight: var(--font-weight-semibold);
     }
   }
 
   &.is-today:not(.is-checked) {
-    border: 2px solid #67c23a;
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
   }
 
   &:not(.is-empty):not(.is-checked) {
-    background: #f5f7fa;
+    background: var(--color-bg-hover);
   }
 
   .day-number {

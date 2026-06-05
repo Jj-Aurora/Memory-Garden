@@ -72,6 +72,7 @@ com\memorygarden\model\vo\UserVO.class
 com\memorygarden\common\result\BaseResponse.class
 com\memorygarden\algorithm\GrowthStageCalculator$1.class
 com\memorygarden\model\entity\StudyPackImport.class
+com\memorygarden\common\util\JwtUtils.class
 com\memorygarden\common\exception\BusinessException.class
 com\memorygarden\model\vo\PlantVO.class
 com\memorygarden\model\enums\SelfEvaluation.class

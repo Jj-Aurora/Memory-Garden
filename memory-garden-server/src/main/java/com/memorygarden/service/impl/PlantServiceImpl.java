@@ -119,7 +119,7 @@ public class PlantServiceImpl implements PlantService {
                 comparator = Comparator.comparing(p -> p.getNextReviewDate() != null ? p.getNextReviewDate() : java.time.LocalDate.MAX);
                 break;
             default:
-                comparator = Comparator.comparingLong(Plant::getId);
+                comparator = Comparator.comparing(p -> p.getCreateTime() != null ? p.getCreateTime() : new Date(0));
                 break;
         }
 

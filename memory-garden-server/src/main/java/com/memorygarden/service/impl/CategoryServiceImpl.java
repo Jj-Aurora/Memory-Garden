@@ -1,5 +1,7 @@
 package com.memorygarden.service.impl;
 
+import com.memorygarden.common.exception.BusinessException;
+import com.memorygarden.common.result.ResultCode;
 import com.memorygarden.mapper.CategoryMapper;
 import com.memorygarden.model.dto.CategoryCreateRequest;
 import com.memorygarden.model.entity.Category;
@@ -33,7 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Long create(Long userId, CategoryCreateRequest request) {
         if (request.getName() == null || request.getName().trim().isEmpty()) {
-            throw new RuntimeException("分类名称不能为空");
+            throw new BusinessException(ResultCode.PARAMS_ERROR, "分类名称不能为空");
         }
 
         Category category = new Category();
@@ -70,10 +72,10 @@ public class CategoryServiceImpl implements CategoryService {
     public boolean update(Long id, Long userId, CategoryCreateRequest request) {
         Category category = categoryMapper.selectById(id);
         if (category == null) {
-            throw new RuntimeException("分类不存在");
+            throw new BusinessException(ResultCode.NOT_FOUND_ERROR, "分类不存在");
         }
         if (!category.getUserId().equals(userId)) {
-            throw new RuntimeException("无权操作");
+            throw new BusinessException(ResultCode.NO_AUTH_ERROR, "无权操作");
         }
 
         if (request.getName() != null) {
@@ -100,10 +102,10 @@ public class CategoryServiceImpl implements CategoryService {
     public boolean delete(Long id, Long userId) {
         Category category = categoryMapper.selectById(id);
         if (category == null) {
-            throw new RuntimeException("分类不存在");
+            throw new BusinessException(ResultCode.NOT_FOUND_ERROR, "分类不存在");
         }
         if (!category.getUserId().equals(userId)) {
-            throw new RuntimeException("无权操作");
+            throw new BusinessException(ResultCode.NO_AUTH_ERROR, "无权操作");
         }
 
         category.setIsDeleted(1);

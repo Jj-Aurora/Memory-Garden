@@ -1,9 +1,8 @@
 <template>
   <div class="profile-view">
-    <h2>个人中心</h2>
+    <h2 class="section-title">个人中心</h2>
 
     <div v-loading="loading" class="profile-content">
-      <!-- 用户信息卡片 -->
       <div v-if="userStore.userInfo" class="profile-card">
         <div class="profile-avatar">
           <el-avatar :size="80" :src="userStore.userInfo.avatarUrl || undefined">
@@ -14,13 +13,22 @@
           <h3>{{ userStore.userInfo.nickname || userStore.userInfo.username }}</h3>
           <p class="profile-username">@{{ userStore.userInfo.username }}</p>
           <div class="profile-stats">
-            <span>连续打卡 {{ userStore.userInfo.currentStreak }} 天</span>
-            <span>最长 {{ userStore.userInfo.maxStreak }} 天</span>
+            <span class="streak-item">
+              <svg class="streak-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
+              连续 {{ userStore.userInfo.currentStreak }} 天
+            </span>
+            <span class="streak-item">
+              <svg class="streak-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              最长 {{ userStore.userInfo.maxStreak }} 天
+            </span>
           </div>
         </div>
       </div>
 
-      <!-- 修改信息 -->
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px" style="max-width: 500px"
         class="profile-form">
         <el-form-item label="昵称" prop="nickname">
@@ -34,7 +42,6 @@
         </el-form-item>
       </el-form>
 
-      <!-- 徽章概览 -->
       <div class="profile-badges">
         <h3>我的徽章</h3>
         <div v-loading="badgesLoading" class="badge-grid">
@@ -47,7 +54,6 @@
         <el-button text type="primary" @click="router.push('/badge')">查看全部徽章</el-button>
       </div>
 
-      <!-- 退出登录 -->
       <div class="profile-logout">
         <el-button type="danger" @click="handleLogout">退出登录</el-button>
       </div>
@@ -127,81 +133,100 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 .profile-view {
-  h2 {
-    margin: 0 0 24px;
-    color: #303133;
-  }
+  max-width: 700px;
 }
 
 .profile-card {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 24px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  margin-bottom: 24px;
+  gap: var(--space-xl);
+  padding: var(--space-xl);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-xl);
 }
 
 .profile-info {
   h3 {
-    margin: 0 0 4px;
-    font-size: 20px;
-    color: #303133;
+    margin: 0 0 var(--space-xs);
+    font-size: var(--font-size-xl);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-bold);
   }
 
   .profile-username {
-    font-size: 14px;
-    color: #909399;
-    margin: 0 0 8px;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin: 0 0 var(--space-sm);
   }
 
   .profile-stats {
     display: flex;
-    gap: 16px;
-    font-size: 13px;
-    color: #67c23a;
+    gap: var(--space-lg);
+    font-size: var(--font-size-sm);
+    color: var(--color-primary);
+  }
+
+  .streak-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .streak-icon {
+    width: 14px;
+    height: 14px;
   }
 }
 
 .profile-form {
-  background: #fff;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  margin-bottom: 24px;
+  background: var(--color-bg-card);
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-xl);
 }
 
 .profile-badges {
-  background: #fff;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  margin-bottom: 24px;
+  background: var(--color-bg-card);
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-xl);
 
   h3 {
-    margin: 0 0 16px;
-    font-size: 16px;
-    color: #303133;
+    margin: 0 0 var(--space-base);
+    font-size: var(--font-size-md);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
   }
 }
 
 .badge-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-base);
 }
 
 .badge-mini {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px;
-  border-radius: 8px;
-  background: #f5f7fa;
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-hover);
   min-width: 60px;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background: var(--color-bg-active);
+    transform: translateY(-1px);
+  }
 
   .badge-emoji {
     font-size: 24px;
@@ -209,13 +234,24 @@ onMounted(async () => {
 
   .badge-name {
     font-size: 11px;
-    color: #606266;
-    margin-top: 4px;
+    color: var(--color-text-secondary);
+    margin-top: var(--space-xs);
     text-align: center;
   }
 }
 
 .profile-logout {
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .profile-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-info .profile-stats {
+    justify-content: center;
+  }
 }
 </style>

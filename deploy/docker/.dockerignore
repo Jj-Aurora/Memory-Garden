@@ -1,0 +1,21 @@
+# 环境变量文件（含敏感信息，不提交到版本控制）
+.env
+
+# 构建产物
+dist/
+memory-garden-server/target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+
+# Node
+node_modules/

@@ -3,6 +3,8 @@ package com.memorygarden.interceptor;
 import com.memorygarden.common.constant.Constant;
 import com.memorygarden.common.exception.BusinessException;
 import com.memorygarden.common.result.ResultCode;
+import com.memorygarden.common.util.JwtUtils;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,6 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+
+import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,6 +34,13 @@ class AuthInterceptorTest {
 
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
+
+    @BeforeAll
+    static void initJwtSecret() throws Exception {
+        Field secretField = JwtUtils.class.getDeclaredField("SECRET");
+        secretField.setAccessible(true);
+        secretField.set(null, "test-jwt-secret-key-for-unit-tests-only");
+    }
 
     @BeforeEach
     void setUp() {
@@ -86,9 +97,10 @@ class AuthInterceptorTest {
     class TokenParseTests {
 
         @Test
-        @DisplayName("有效 Token（无 Bearer 前缀）-解析成功并设置 userId")
+        @DisplayName("有效 JWT Token（无 Bearer 前缀）-解析成功并设置 userId")
         void testPreHandle_ValidTokenWithoutPrefix() throws Exception {
-            request.addHeader(Constant.AUTHORIZATION_HEADER, "123:abc456def");
+            String token = JwtUtils.generateToken(123L);
+            request.addHeader(Constant.AUTHORIZATION_HEADER, token);
 
             boolean result = authInterceptor.preHandle(request, response, null);
 
@@ -97,9 +109,10 @@ class AuthInterceptorTest {
         }
 
         @Test
-        @DisplayName("有效 Token（带 Bearer 前缀）-解析成功并设置 userId")
+        @DisplayName("有效 JWT Token（带 Bearer 前缀）-解析成功并设置 userId")
         void testPreHandle_ValidTokenWithPrefix() throws Exception {
-            request.addHeader(Constant.AUTHORIZATION_HEADER, Constant.TOKEN_PREFIX + "456:xyz789");
+            String token = JwtUtils.generateToken(456L);
+            request.addHeader(Constant.AUTHORIZATION_HEADER, Constant.TOKEN_PREFIX + token);
 
             boolean result = authInterceptor.preHandle(request, response, null);
 
@@ -108,9 +121,9 @@ class AuthInterceptorTest {
         }
 
         @Test
-        @DisplayName("Token 中 userId 非数字-抛出未登录异常")
-        void testPreHandle_NonNumericUserId() {
-            request.addHeader(Constant.AUTHORIZATION_HEADER, "abc:def123");
+        @DisplayName("伪造 Token-抛出未登录异常")
+        void testPreHandle_ForgedToken() {
+            request.addHeader(Constant.AUTHORIZATION_HEADER, "eyJhbGciOiJIUzI1NiJ9.fakepayload.fakesignature");
 
             BusinessException ex = assertThrows(BusinessException.class, () -> {
                 authInterceptor.preHandle(request, response, null);

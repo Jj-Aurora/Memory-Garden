@@ -62,7 +62,7 @@ class UserServiceIntegrationTest {
 
         String token = userService.login(loginRequest);
         assertNotNull(token);
-        assertTrue(token.contains(":"));
+        assertTrue(token.split("\\.").length == 3, "Token 应为 JWT 三段式格式");
 
         // 4. 获取当前用户
         UserVO userVO = userService.getCurrentUser(dbUser.getId());

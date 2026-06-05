@@ -1,29 +1,40 @@
 <template>
   <div class="garden-view">
     <div class="garden-header">
-      <h2>我的花园</h2>
+      <div>
+        <h2 class="section-title">我的花园</h2>
+        <p class="garden-subtitle">用知识浇灌，让记忆开花</p>
+      </div>
       <div class="garden-actions">
-        <el-button type="primary" @click="router.push('/card/create')">
-          <el-icon><Plus /></el-icon> 添加知识卡片
+        <el-button type="primary" size="large" @click="router.push('/card/create')">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          添加知识卡片
         </el-button>
-        <el-button @click="router.push('/review')">
-          <el-icon><Reading /></el-icon> 开始复习
-          <el-badge v-if="pendingCount > 0" :value="pendingCount" class="review-badge" />
+        <el-button size="large" @click="router.push('/review')">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+          </svg>
+          开始复习
+          <span v-if="pendingCount > 0" class="review-count">{{ pendingCount }}</span>
         </el-button>
       </div>
     </div>
 
     <!-- 统计概览 -->
     <div v-if="gardenView" class="garden-stats">
-      <div class="stat-item">
+      <div class="stat-card stat-total">
         <span class="stat-value">{{ gardenView.totalCount }}</span>
         <span class="stat-label">总植物</span>
       </div>
-      <div class="stat-item">
+      <div v-if="gardenView.witheredCount > 0" class="stat-card stat-withered">
         <span class="stat-value">{{ gardenView.witheredCount }}</span>
         <span class="stat-label">枯萎</span>
       </div>
-      <div v-for="(count, stage) in gardenView.stageCount" :key="stage" class="stat-item">
+      <div v-for="(count, stage) in gardenView.stageCount" :key="stage" class="stat-card"
+        :class="`stat-stage-${stage}`">
         <span class="stat-value">{{ count }}</span>
         <span class="stat-label">{{ stageName(stage as number) }}</span>
       </div>
@@ -70,7 +81,15 @@
           @click="router.push(`/card/${plant.cardId}/edit`)"
         />
       </div>
-      <el-empty v-else description="花园里还没有植物，快去添加知识卡片吧！" />
+      <div v-else class="empty-state">
+        <svg class="empty-icon" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="28" stroke="var(--color-border)" stroke-width="2" fill="var(--color-primary-bg)" />
+          <path d="M32 18c-4 0-8 4-8 8s4 8 8 8 8-4 8-8-4-8-8-8z" fill="var(--color-primary-lighter)" />
+          <path d="M32 34v10M28 40h8" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <p class="empty-text">花园里还没有植物，快去添加知识卡片吧！</p>
+        <el-button type="primary" @click="router.push('/card/create')">添加第一张卡片</el-button>
+      </div>
     </div>
   </div>
 </template>
@@ -78,7 +97,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus, Reading } from '@element-plus/icons-vue'
 import { useGardenStore } from '@/stores/garden'
 import { useReviewStore } from '@/stores/review'
 import { categoryApi, type Category } from '@/api/category'
@@ -127,68 +145,155 @@ onMounted(loadData)
 .garden-view {
   .garden-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: var(--space-xl);
+    gap: var(--space-base);
+  }
 
-    h2 {
-      margin: 0;
-      color: #303133;
-    }
+  .garden-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-top: var(--space-xs);
   }
 
   .garden-actions {
     display: flex;
-    gap: 12px;
+    gap: var(--space-sm);
     align-items: center;
-
-    .review-badge {
-      margin-left: 4px;
-    }
+    flex-shrink: 0;
   }
 
-  .garden-stats {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
+  .btn-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
   }
 
-  .stat-item {
-    display: flex;
-    flex-direction: column;
+  .review-count {
+    display: inline-flex;
     align-items: center;
-    padding: 12px 20px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    min-width: 80px;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    margin-left: 6px;
+    font-size: 11px;
+    font-weight: var(--font-weight-bold);
+    color: #fff;
+    background: var(--color-accent-danger);
+    border-radius: var(--radius-full);
+  }
+}
+
+.garden-stats {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-base) var(--space-lg);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  min-width: 80px;
+  transition: all var(--transition-normal);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-primary);
   }
 
   .stat-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: #2d8c3c;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    line-height: var(--line-height-tight);
   }
 
   .stat-label {
-    font-size: 12px;
-    color: #909399;
-    margin-top: 4px;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    margin-top: var(--space-xs);
+    font-weight: var(--font-weight-medium);
   }
 
-  .garden-filter {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    align-items: center;
+  &.stat-withered .stat-value {
+    color: var(--color-withered);
+  }
+
+  &.stat-stage-1 .stat-value { color: var(--color-seed); }
+  &.stat-stage-2 .stat-value { color: var(--color-sprout); }
+  &.stat-stage-3 .stat-value { color: var(--color-growing); }
+  &.stat-stage-4 .stat-value { color: var(--color-blooming); }
+  &.stat-stage-5 .stat-value { color: var(--color-fruiting); }
+}
+
+.garden-filter {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.plant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: var(--space-base);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3xl);
+  text-align: center;
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: var(--space-lg);
+  }
+
+  .empty-text {
+    font-size: var(--font-size-md);
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .garden-view .garden-header {
+    flex-direction: column;
+  }
+
+  .garden-view .garden-actions {
+    width: 100%;
+  }
+
+  .garden-view .garden-actions .el-button {
+    flex: 1;
   }
 
   .plant-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: var(--space-sm);
+  }
+
+  .stat-card {
+    padding: var(--space-sm) var(--space-base);
+    min-width: 70px;
+
+    .stat-value {
+      font-size: var(--font-size-xl);
+    }
   }
 }
 </style>

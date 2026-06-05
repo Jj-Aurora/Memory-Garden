@@ -1,4 +1,8 @@
 # 集成测试配置 - H2 内存数据库
+
+jwt:
+  secret: test-jwt-secret-key-for-unit-tests-only
+
 spring:
   datasource:
     driver-class-name: org.h2.Driver
